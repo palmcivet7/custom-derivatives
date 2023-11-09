@@ -107,12 +107,12 @@ contract CustomDerivative {
         emit CollateralDeposited(sender, amount);
     }
 
-    function depositCollateralPartyA(uint256 amount) external {
+    function depositCollateralPartyA(uint256 amount) external notSettledOrCancelled {
         if (msg.sender != partyA) revert CustomDerivative__OnlyDepositsByPartyA();
         _depositCollateral(amount);
     }
 
-    function agreeToContractAndDeposit(uint256 amount) external {
+    function agreeToContractAndDeposit(uint256 amount) external notSettledOrCancelled {
         _agreeToContract();
         _depositCollateral(amount);
     }
