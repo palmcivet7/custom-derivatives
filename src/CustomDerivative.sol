@@ -93,11 +93,16 @@ contract CustomDerivative {
         address _partyA = partyA;
         address _partyB = partyB;
         address sender = msg.sender;
+        uint256 _collateralAmount = collateralAmount;
         if (sender != _partyA || sender != _partyB) revert CustomDerivative__OnlyPartiesCanDeposit();
-        if (amount < collateralAmount) revert CustomDerivative__NotEnoughCollateral();
+        if (amount < _collateralAmount) revert CustomDerivative__NotEnoughCollateral();
         if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
 
         if (!collateralToken.transferFrom(sender, address(this), amount)) revert CustomDerivative__TransferFailed();
+        uint256 excess = amount - _collateralAmount;
+        if (excess > 0) {
+            if (!collateralToken.transferFrom(address(this), sender, excess)) revert CustomDerivative__TransferFailed();
+        }
         if (sender == _partyA) {
             partyACollateral = amount;
         } else {
@@ -147,11 +152,11 @@ contract CustomDerivative {
         if (msg.sender == partyA) {
             amount = partyACollateral;
             partyACollateral = 0;
-            if (!collateralToken.transfer(partyA, partyACollateral)) revert CustomDerivative__TransferFailed();
+            if (!collateralToken.transfer(partyA, amount)) revert CustomDerivative__TransferFailed();
         } else {
             amount = partyBCollateral;
             partyBCollateral = 0;
-            if (!collateralToken.transfer(partyB, partyBCollateral)) revert CustomDerivative__TransferFailed();
+            if (!collateralToken.transfer(partyB, amount)) revert CustomDerivative__TransferFailed();
         }
 
         emit CollateralWithdrawn(msg.sender, amount);
