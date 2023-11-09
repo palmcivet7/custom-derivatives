@@ -11,7 +11,6 @@ contract DerivativeFactory {
         address priceFeed, // underlying asset
         uint256 strikePrice,
         uint256 settlementTime,
-        uint256 cancellationPeriod,
         address collateralToken,
         uint256 collateralAmount,
         bool isPartyALong
@@ -21,7 +20,6 @@ contract DerivativeFactory {
             priceFeed,
             strikePrice,
             settlementTime,
-            cancellationPeriod,
             collateralToken,
             collateralAmount,
             isPartyALong
