@@ -11,7 +11,7 @@ contract DerivativeFactory {
         address priceFeed, // underlying asset
         uint256 strikePrice,
         uint256 settlementTime,
-        address collateralToken,
+        address collateralToken, // USDC
         uint256 collateralAmount,
         bool isPartyALong
     ) external returns (address) {

@@ -3,10 +3,7 @@
 pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-interface IPriceFeed {
-    function getLatestPrice() external view returns (uint256);
-}
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract CustomDerivative {
     error CustomDerivative__CounterpartyAlreadyAgreed();
@@ -36,7 +33,7 @@ contract CustomDerivative {
     address payable public partyA;
     address payable public partyB;
 
-    IPriceFeed public priceFeed;
+    AggregatorV3Interface public priceFeed;
     uint256 public strikePrice;
     uint256 public settlementTime;
     IERC20 public collateralToken;
@@ -62,7 +59,7 @@ contract CustomDerivative {
         bool _isPartyALong
     ) {
         partyA = _partyA;
-        priceFeed = IPriceFeed(_priceFeed);
+        priceFeed = AggregatorV3Interface(_priceFeed);
         strikePrice = _strikePrice;
         settlementTime = _settlementTime;
         collateralToken = IERC20(_collateralToken);
@@ -128,7 +125,8 @@ contract CustomDerivative {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
         if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
 
-        uint256 finalPrice = priceFeed.getLatestPrice();
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        uint256 finalPrice = uint256(price);
         contractSettled = true;
         uint256 totalCollateral = partyACollateral + partyBCollateral;
         address winner;
