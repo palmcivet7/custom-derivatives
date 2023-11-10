@@ -89,11 +89,11 @@ contract CustomDerivative {
     }
 
     function _depositCollateral(uint256 amount) private {
-        address _partyA = partyA;
-        address _partyB = partyB;
+        // address _partyA = partyA;
+        // address _partyB = partyB;
         address sender = msg.sender;
         uint256 _collateralAmount = collateralAmount;
-        if (sender != _partyA || sender != _partyB) revert CustomDerivative__OnlyPartiesCanDeposit();
+        // if (sender != _partyA || sender != _partyB) revert CustomDerivative__OnlyPartiesCanDeposit();
         if (amount < _collateralAmount) revert CustomDerivative__NotEnoughCollateral();
         if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
 
@@ -102,7 +102,7 @@ contract CustomDerivative {
         if (excess > 0) {
             if (!collateralToken.transferFrom(address(this), sender, excess)) revert CustomDerivative__TransferFailed();
         }
-        if (sender == _partyA) {
+        if (sender == partyA) {
             partyACollateral = amount;
         } else {
             partyBCollateral = amount;
