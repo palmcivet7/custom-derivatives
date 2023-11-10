@@ -19,7 +19,7 @@ contract DerivativeFactoryTest is Test {
 
     address priceFeed; // underlying asset
     uint256 public constant STRIKE_PRICE = 1900e8;
-    uint256 public settlementTime = block.timestamp + 50;
+    uint256 public settlementTime = block.timestamp + 10 minutes;
     address collateralToken;
     uint256 public constant COLLATERAL_AMOUNT = 4000e8;
     bool long = true;
@@ -86,6 +86,10 @@ contract DerivativeFactoryTest is Test {
         _;
     }
 
+    //////////////////////////////////////
+    //////// Deposit Collateral /////////
+    ////////////////////////////////////
+
     function testDepositCollateralPartyARevertsIfNotPartyA() public longContract fundUsersAndApproveContract {
         vm.startPrank(PARTY_B);
         vm.expectRevert(CustomDerivative.CustomDerivative__OnlyDepositsByPartyA.selector);
@@ -139,5 +143,41 @@ contract DerivativeFactoryTest is Test {
         vm.expectRevert(CustomDerivative.CustomDerivative__CounterpartyAlreadyAgreed.selector);
         customDerivative.agreeToContractAndDeposit(COLLATERAL_AMOUNT);
         vm.stopPrank();
+    }
+
+    function testDepositCollateralPartyARefundsExcess() public longContract fundUsersAndApproveContract {
+        vm.startPrank(PARTY_A);
+        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        customDerivative.depositCollateralPartyA(COLLATERAL_AMOUNT + 1);
+        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        assertEq(endingBalance, startingBalance - COLLATERAL_AMOUNT);
+        vm.stopPrank();
+    }
+
+    function testDepositCollateralPartyA() public longContract fundUsersAndApproveContract {
+        vm.prank(PARTY_A);
+        customDerivative.depositCollateralPartyA(COLLATERAL_AMOUNT);
+        assertEq(customDerivative.partyACollateral(), COLLATERAL_AMOUNT);
+    }
+
+    /////////////////////////////////
+    //////// Settlement ////////////
+    ///////////////////////////////
+
+    function testSettleContractRevertsIfTimeNotReached() public longContract fundUsersAndApproveContract {
+        vm.startPrank(PARTY_A);
+        vm.expectRevert(CustomDerivative.CustomDerivative__SettlementTimeNotReached.selector);
+        customDerivative.settleContract();
+        vm.stopPrank();
+    }
+
+    ////////////////////////////////////
+    ///////// Cancel Contract /////////
+    //////////////////////////////////
+
+    function testSetCancelPartyA() public longContract fundUsersAndApproveContract {
+        vm.prank(PARTY_A);
+        customDerivative.setCancelPartyA();
+        assertEq(customDerivative.partyACancel(), true);
     }
 }

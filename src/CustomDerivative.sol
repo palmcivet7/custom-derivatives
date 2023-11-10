@@ -79,6 +79,10 @@ contract CustomDerivative {
         _;
     }
 
+    //////////////////////////////////////
+    //////// Deposit Collateral /////////
+    ////////////////////////////////////
+
     function _agreeToContract() private {
         if (counterpartyAgreed) revert CustomDerivative__CounterpartyAlreadyAgreed();
         address sender = msg.sender;
@@ -89,18 +93,15 @@ contract CustomDerivative {
     }
 
     function _depositCollateral(uint256 amount) private {
-        // address _partyA = partyA;
-        // address _partyB = partyB;
         address sender = msg.sender;
         uint256 _collateralAmount = collateralAmount;
-        // if (sender != _partyA || sender != _partyB) revert CustomDerivative__OnlyPartiesCanDeposit();
         if (amount < _collateralAmount) revert CustomDerivative__NotEnoughCollateral();
         if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
 
         if (!collateralToken.transferFrom(sender, address(this), amount)) revert CustomDerivative__TransferFailed();
         uint256 excess = amount - _collateralAmount;
         if (excess > 0) {
-            if (!collateralToken.transferFrom(address(this), sender, excess)) revert CustomDerivative__TransferFailed();
+            if (!collateralToken.transfer(sender, excess)) revert CustomDerivative__TransferFailed();
         }
         if (sender == partyA) {
             partyACollateral = amount;
@@ -120,6 +121,10 @@ contract CustomDerivative {
         _agreeToContract();
         _depositCollateral(amount);
     }
+
+    /////////////////////////////////
+    //////// Settlement ////////////
+    ///////////////////////////////
 
     function settleContract() external notSettledOrCancelled {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
