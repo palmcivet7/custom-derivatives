@@ -91,6 +91,9 @@ contract CustomDerivative {
     ///////// Modifiers /////////
     ////////////////////////////
 
+    /**
+     * @notice Functions with this modifier will revert if the contract has already settled or been cancelled.
+     */
     modifier notSettledOrCancelled() {
         if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
         if (contractCancelled) revert CustomDerivative__ContractCancelled();
