@@ -17,7 +17,7 @@ contract FactorySender is Ownable {
 
     Config public config;
 
-    constructor(address _link, address _router) Ownable(msg.sender) {
+    constructor(address _link, address _router) {
         link = _link;
         router = _router;
     }
