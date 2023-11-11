@@ -51,10 +51,28 @@ contract DerivativeFactoryTest is Test {
         _;
     }
 
+    modifier longContractDoubleStrike() {
+        vm.prank(PARTY_A);
+        customLong = derivativeFactory.createCustomDerivative(
+            priceFeed, STRIKE_PRICE * 2, settlementTime, collateralToken, COLLATERAL_AMOUNT, long
+        );
+        customDerivative = CustomDerivative(customLong);
+        _;
+    }
+
     modifier shortContract() {
         vm.prank(PARTY_A);
         customShort = derivativeFactory.createCustomDerivative(
             priceFeed, STRIKE_PRICE, settlementTime, collateralToken, COLLATERAL_AMOUNT, notLong
+        );
+        customDerivative = CustomDerivative(customShort);
+        _;
+    }
+
+    modifier shortContractDoubleStrike() {
+        vm.prank(PARTY_A);
+        customShort = derivativeFactory.createCustomDerivative(
+            priceFeed, STRIKE_PRICE * 2, settlementTime, collateralToken, COLLATERAL_AMOUNT, notLong
         );
         customDerivative = CustomDerivative(customShort);
         _;
@@ -171,6 +189,100 @@ contract DerivativeFactoryTest is Test {
         vm.stopPrank();
     }
 
+    function testSettleContractRevertsIfCollateralNotFullyDeposited() public longContract fundUsersAndApproveContract {
+        vm.startPrank(PARTY_A);
+        customDerivative.depositCollateralPartyA(COLLATERAL_AMOUNT);
+        vm.warp(block.timestamp + 11 minutes);
+        vm.expectRevert(CustomDerivative.CustomDerivative__CollateralNotFullyDeposited.selector);
+        customDerivative.settleContract();
+        vm.stopPrank();
+    }
+
+    modifier bothPartiesDeposited() {
+        vm.prank(PARTY_A);
+        customDerivative.depositCollateralPartyA(COLLATERAL_AMOUNT);
+        vm.prank(PARTY_B);
+        customDerivative.agreeToContractAndDeposit(COLLATERAL_AMOUNT);
+        _;
+    }
+
+    function testSettleContractPaysPartyAWhenALong()
+        public
+        longContract
+        fundUsersAndApproveContract
+        bothPartiesDeposited
+    {
+        vm.warp(block.timestamp + 11 minutes);
+        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        vm.prank(PARTY_A);
+        customDerivative.settleContract();
+        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        assertEq(customDerivative.contractSettled(), true);
+    }
+
+    function testSettleContractPaysPartyBWhenAShort()
+        public
+        shortContract
+        fundUsersAndApproveContract
+        bothPartiesDeposited
+    {
+        vm.warp(block.timestamp + 11 minutes);
+        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        vm.prank(PARTY_A);
+        customDerivative.settleContract();
+        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        assertEq(customDerivative.contractSettled(), true);
+    }
+
+    function testSettleContractPaysPartyBWhenALong()
+        public
+        longContractDoubleStrike
+        fundUsersAndApproveContract
+        bothPartiesDeposited
+    {
+        vm.warp(block.timestamp + 11 minutes);
+        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        vm.prank(PARTY_A);
+        customDerivative.settleContract();
+        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        assertEq(customDerivative.contractSettled(), true);
+    }
+
+    function testSettleContractPaysPartyAWhenAShort()
+        public
+        shortContractDoubleStrike
+        fundUsersAndApproveContract
+        bothPartiesDeposited
+    {
+        vm.warp(block.timestamp + 11 minutes);
+        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        vm.prank(PARTY_A);
+        customDerivative.settleContract();
+        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        assertEq(customDerivative.contractSettled(), true);
+    }
+
+    function testSettleContractRevertsIfAlreadySettled()
+        public
+        longContract
+        fundUsersAndApproveContract
+        bothPartiesDeposited
+    {
+        vm.warp(block.timestamp + 11 minutes);
+        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        vm.startPrank(PARTY_A);
+        customDerivative.settleContract();
+        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        assertEq(customDerivative.contractSettled(), true);
+        vm.expectRevert(CustomDerivative.CustomDerivative__ContractAlreadySettled.selector);
+        customDerivative.settleContract();
+    }
+
     ////////////////////////////////////
     ///////// Cancel Contract /////////
     //////////////////////////////////
@@ -179,5 +291,75 @@ contract DerivativeFactoryTest is Test {
         vm.prank(PARTY_A);
         customDerivative.setCancelPartyA();
         assertEq(customDerivative.partyACancel(), true);
+    }
+
+    function testSetCancelPartyARevertsIfNotPartyA() public longContract fundUsersAndApproveContract {
+        vm.startPrank(PARTY_B);
+        vm.expectRevert(CustomDerivative.CustomDerivative__OnlyPartyACanCall.selector);
+        customDerivative.setCancelPartyA();
+        vm.stopPrank();
+    }
+
+    modifier depositCollateral() {
+        vm.prank(PARTY_A);
+        customDerivative.depositCollateralPartyA(COLLATERAL_AMOUNT);
+        vm.prank(PARTY_B);
+        customDerivative.agreeToContractAndDeposit(COLLATERAL_AMOUNT);
+        _;
+    }
+
+    function testSetCancelPartyB() public longContract fundUsersAndApproveContract depositCollateral {
+        vm.prank(PARTY_B);
+        customDerivative.setCancelPartyB();
+        assertEq(customDerivative.partyBCancel(), true);
+    }
+
+    function testSetCancelPartyBRevertsIfNotPartyB() public longContract fundUsersAndApproveContract {
+        vm.startPrank(PARTY_A);
+        vm.expectRevert(CustomDerivative.CustomDerivative__OnlyPartyBCanCall.selector);
+        customDerivative.setCancelPartyB();
+        vm.stopPrank();
+    }
+
+    function test_cancelContract() public longContract fundUsersAndApproveContract depositCollateral {
+        uint256 aStartingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        uint256 bStartingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        vm.prank(PARTY_A);
+        customDerivative.setCancelPartyA();
+        vm.prank(PARTY_B);
+        customDerivative.setCancelPartyB();
+        uint256 aEndingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        uint256 bEndingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        assertEq(customDerivative.contractCancelled(), true);
+        assertEq(aStartingBalance + COLLATERAL_AMOUNT, aEndingBalance);
+        assertEq(bStartingBalance + COLLATERAL_AMOUNT, bEndingBalance);
+    }
+
+    function testSetCancelPartyARevertsIfAlreadyCancelled()
+        public
+        longContract
+        fundUsersAndApproveContract
+        depositCollateral
+    {
+        vm.prank(PARTY_B);
+        customDerivative.setCancelPartyB();
+        vm.startPrank(PARTY_A);
+        customDerivative.setCancelPartyA();
+        vm.expectRevert(CustomDerivative.CustomDerivative__ContractCancelled.selector);
+        customDerivative.setCancelPartyA();
+    }
+
+    function testSetCancelPartyBRevertsIfAlreadyCancelled()
+        public
+        longContract
+        fundUsersAndApproveContract
+        depositCollateral
+    {
+        vm.prank(PARTY_A);
+        customDerivative.setCancelPartyA();
+        vm.startPrank(PARTY_B);
+        customDerivative.setCancelPartyB();
+        vm.expectRevert(CustomDerivative.CustomDerivative__ContractCancelled.selector);
+        customDerivative.setCancelPartyB();
     }
 }
