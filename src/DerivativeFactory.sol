@@ -8,7 +8,7 @@ import {CustomDerivative} from "./CustomDerivative.sol";
  * @title DerivativeFactory
  * @author palmcivet.eth
  *
- * This is the contract that allows users to deploy their own versions of our CustomDerivative contract.
+ * This is the factory contract that allows users to deploy their own versions of our CustomDerivative contract.
  * When a user deploys their CustomDerivative contract they will specify the following parameters:
  *  - underlying asset
  *  - strike price (the final price being above or below this will determine the party receiving the payout)

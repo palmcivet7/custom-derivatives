@@ -5,6 +5,14 @@ pragma solidity ^0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
+/**
+ * @title CustomDerivative
+ * @author palmcivet.eth
+ *
+ * This is the custom contract that is deployed by users via the DerivativeFactory contract.
+ * @notice This contract contains the main logic for our the derivative agreement between parties.
+ */
+
 contract CustomDerivative {
     error CustomDerivative__CounterpartyAlreadyAgreed();
     error CustomDerivative__AddressCannotBeBothParties();
@@ -33,9 +41,13 @@ contract CustomDerivative {
     address payable public partyB;
 
     AggregatorV3Interface public priceFeed;
+    IERC20 public collateralToken;
     uint256 public strikePrice;
     uint256 public settlementTime;
-    IERC20 public collateralToken;
+
+    uint256 public collateralAmount;
+    uint256 public partyACollateral;
+    uint256 public partyBCollateral;
 
     bool public isPartyALong;
     bool public counterpartyAgreed;
@@ -44,10 +56,17 @@ contract CustomDerivative {
     bool public partyBCancel;
     bool public contractCancelled;
 
-    uint256 public collateralAmount;
-    uint256 public partyACollateral;
-    uint256 public partyBCollateral;
-
+    /**
+     * @param _partyA The address of user who deployed the custom contract via the DerivativeFactory
+     * @param _priceFeed The Chainlink PriceFeed address of the underlying asset
+     * @param _strikePrice The strike price is what the final price is compared against to determine the payout receipient
+     * @param _settlementTime The settlement time at which the strike price is compared to the underlying asset price
+     * @param _collateralToken The address of the ERC20 token used for collateral
+     * @param _collateralAmount The amount of the collateral asset to be deposited by both parties
+     * @param _isPartyALong The position of the deploying user (partyA) - if true they are long, if false they are short
+     * @notice These constructor parameters are intended to be set when the createCustomDerivative()
+     * in the DerivativeFactory contract is called.
+     */
     constructor(
         address payable _partyA,
         address _priceFeed,
@@ -82,6 +101,10 @@ contract CustomDerivative {
     //////// Deposit Collateral /////////
     ////////////////////////////////////
 
+    /**
+     * @notice This function is called by agreeToContractAndDeposit()
+     * and sets the msg.sender as the contract's counterparty (partyB)
+     */
     function _agreeToContract() private {
         if (counterpartyAgreed) revert CustomDerivative__CounterpartyAlreadyAgreed();
         address sender = msg.sender;
@@ -91,6 +114,13 @@ contract CustomDerivative {
         emit CounterpartyEntered(sender);
     }
 
+    /**
+     * @notice This function is called by the depositCollateralPartyA()
+     * and agreeToContractAndDeposit() functions, which are called by
+     * parties A and B respectively.
+     * @param amount The amount of collateral to deposit.
+     * The function reverts if not enough is sent and refunds any excess.
+     */
     function _depositCollateral(uint256 amount) private {
         address sender = msg.sender;
         uint256 _collateralAmount = collateralAmount;
@@ -111,11 +141,24 @@ contract CustomDerivative {
         emit CollateralDeposited(sender, amount);
     }
 
+    /**
+     * @notice This function can only be called by partyA - the user who set the terms and
+     * deployed the contract - to deposit their collateral.
+     * @param amount The amount of collateral to deposit.
+     * The function passes this amount to the _depositCollateral() function.
+     */
     function depositCollateralPartyA(uint256 amount) external notSettledOrCancelled {
         if (msg.sender != partyA) revert CustomDerivative__OnlyDepositsByPartyA();
         _depositCollateral(amount);
     }
 
+    /**
+     * @notice This function is to be called by a voluntary counterparty who agrees to
+     * the terms of the contract, but takes an opposing position to the deployer.
+     * @param amount The amount of collateral to deposit.
+     * The function passes this amount to the _depositCollateral() function
+     * after calling _agreeToContract().
+     */
     function agreeToContractAndDeposit(uint256 amount) external notSettledOrCancelled {
         _agreeToContract();
         _depositCollateral(amount);
@@ -125,6 +168,15 @@ contract CustomDerivative {
     //////// Settlement ////////////
     ///////////////////////////////
 
+    /**
+     * @notice This function settles the contract. It can only be called after the settlementTime has passed
+     * and if both parties have deposited their collateral.
+     * It pays out both parties collateral to the party that who's long or short position was correct.
+     * NOTE: It currently pays out when the function is called as long as settlementTime has passed -
+     * ideally it should pay out immediately when settlementTime occurs. The solution to this would
+     * potentially be to use Chainlink Automation or Chainlink Data Streams.
+     * @dev Chainlink PriceFeeds are used to retrieve the price of the underlying asset.
+     */
     function settleContract() external notSettledOrCancelled {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
         if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
@@ -150,6 +202,10 @@ contract CustomDerivative {
     ///////// Cancel Contract /////////
     //////////////////////////////////
 
+    /**
+     * @notice This function cancels the contract. It can only be called if both parties agree
+     * and the contract hasn't already reached the time of settlement.
+     */
     function _cancelContract() private {
         contractCancelled = true;
         if (!collateralToken.transfer(partyA, partyACollateral)) revert CustomDerivative__TransferFailed();
@@ -157,6 +213,10 @@ contract CustomDerivative {
         emit ContractCancelled();
     }
 
+    /**
+     * @notice This function allows Party A to request cancellation of the contract.
+     * If Party B has already requested cancellation, this function will call _cancelContract()
+     */
     function setCancelPartyA() external notSettledOrCancelled {
         if (msg.sender != partyA) revert CustomDerivative__OnlyPartyACanCall();
         partyACancel = true;
@@ -166,6 +226,10 @@ contract CustomDerivative {
         }
     }
 
+    /**
+     * @notice This function allows Party B to request cancellation of the contract.
+     * If Party A has already requested cancellation, this function will call _cancelContract()
+     */
     function setCancelPartyB() external notSettledOrCancelled {
         if (msg.sender != partyB) revert CustomDerivative__OnlyPartyBCanCall();
         partyBCancel = true;
@@ -175,6 +239,10 @@ contract CustomDerivative {
         }
     }
 
+    /**
+     * @notice This function allows either party to cancel the contract and withdraw their deposit
+     * if the settlement time has been reached and a counterparty never deposited any collateral.
+     */
     function cancelDueToIncompleteDeposit() external {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
         uint256 _partyACollateral = partyACollateral;
@@ -184,8 +252,6 @@ contract CustomDerivative {
             revert CustomDerivative__CollateralFullyDeposited();
         }
 
-        // If cancellation period is reached and one of the parties has not deposited
-        // the full collateral, allow the other party to withdraw their collateral
         if (_partyACollateral > 0) {
             partyACollateral = 0;
             if (!collateralToken.transfer(partyA, _partyACollateral)) revert CustomDerivative__TransferFailed();
