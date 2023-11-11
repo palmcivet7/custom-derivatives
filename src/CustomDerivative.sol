@@ -174,7 +174,7 @@ contract CustomDerivative {
     /**
      * @notice This function settles the contract. It can only be called after the settlementTime has passed
      * and if both parties have deposited their collateral.
-     * It pays out both parties collateral to the party that who's long or short position was correct.
+     * It pays out both parties collateral to the party who's long or short position was correct.
      * NOTE: It currently pays out when the function is called as long as settlementTime has passed -
      * ideally it should pay out immediately when settlementTime occurs. The solution to this would
      * potentially be to use Chainlink Automation or Chainlink Data Streams.
