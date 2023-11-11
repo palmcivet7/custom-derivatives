@@ -14,7 +14,6 @@ contract CustomDerivative {
     error CustomDerivative__NotEnoughCollateral();
     error CustomDerivative__TransferFailed();
     error CustomDerivative__SettlementTimeNotReached();
-    error CustomDerivative__OnlyPartiesCanWithdraw();
     error CustomDerivative__OnlyPartyACanCall();
     error CustomDerivative__OnlyPartyBCanCall();
     error CustomDerivative__BothPartiesNeedToAgreeToCancel();
@@ -145,26 +144,6 @@ contract CustomDerivative {
 
         if (!collateralToken.transfer(winner, totalCollateral)) revert CustomDerivative__TransferFailed();
         emit ContractSettled(finalPrice);
-    }
-
-    // Allow parties to withdraw their collateral if the contract is canceled
-    function withdrawCollateral() external {
-        if (!contractCancelled) revert CustomDerivative__ContractNotCancelled();
-        if (msg.sender != partyA || msg.sender != partyB) revert CustomDerivative__OnlyPartiesCanWithdraw();
-        if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
-
-        uint256 amount;
-        if (msg.sender == partyA) {
-            amount = partyACollateral;
-            partyACollateral = 0;
-            if (!collateralToken.transfer(partyA, amount)) revert CustomDerivative__TransferFailed();
-        } else {
-            amount = partyBCollateral;
-            partyBCollateral = 0;
-            if (!collateralToken.transfer(partyB, amount)) revert CustomDerivative__TransferFailed();
-        }
-
-        emit CollateralWithdrawn(msg.sender, amount);
     }
 
     ////////////////////////////////////
