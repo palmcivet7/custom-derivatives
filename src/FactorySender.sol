@@ -32,7 +32,7 @@ contract FactorySender is Ownable {
             receiver: abi.encode(_receiver),
             data: abi.encode(_priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong),
             tokenAmounts: new Client.EVMTokenAmount[](0),
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 2000000})),
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 2000000, strict: false})),
             feeToken: link
         });
 

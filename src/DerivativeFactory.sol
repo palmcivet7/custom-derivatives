@@ -28,7 +28,7 @@ contract DerivativeFactory {
         address collateralToken, // USDC
         uint256 collateralAmount,
         bool isPartyALong
-    ) public returns (address) {
+    ) internal returns (address) {
         CustomDerivative newCustomDerivative = new CustomDerivative(
             payable(msg.sender),
             priceFeed,

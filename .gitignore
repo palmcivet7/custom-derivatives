@@ -17,3 +17,4 @@ docs/
 notes.txt
 
 flattened-contracts
+test/mocks/ccip
