@@ -7,6 +7,9 @@ import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interface
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract FactorySender is Ownable {
+    error FactorySender__NoLinkToWithdraw();
+    error FactorySender__LinkTransferFailed();
+
     address public link;
     address public router;
 
@@ -36,5 +39,12 @@ contract FactorySender is Ownable {
         uint256 fees = IRouterClient(router).getFee(_destinationChainSelector, message);
         LinkTokenInterface(link).approve(address(router), fees);
         IRouterClient(router).ccipSend(_destinationChainSelector, message);
+    }
+
+    function withdrawLink() public onlyOwner {
+        uint256 balance = LinkTokenInterface(link).balanceOf(address(this));
+        if (balance == 0) revert FactorySender__NoLinkToWithdraw();
+
+        if (!LinkTokenInterface(link).transfer(msg.sender, balance)) revert FactorySender__LinkTransferFailed();
     }
 }
