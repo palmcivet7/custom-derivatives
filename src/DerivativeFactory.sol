@@ -23,13 +23,44 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract DerivativeFactory is Ownable {
     error DerivativeFactory__NoLinkToWithdraw();
     error DerivativeFactory__LinkTransferFailed();
+    error DerivativeFactory__LinkTransferAndCallFailed();
 
     event DerivativeCreated(address derivativeContract, address partyA);
 
     address public link;
+    address public registrar;
 
-    constructor(address _link) {
+    RegistrationData public registrationInfo;
+
+    struct RegistrationData {
+        string name;
+        bytes encryptedEmail;
+        address upkeepContract;
+        uint32 gasLimit;
+        address adminAddress;
+        uint8 triggerType;
+        bytes checkData;
+        bytes triggerConfig;
+        bytes offchainConfig;
+        uint96 amount;
+    }
+
+    constructor(address _link, address _registrar) {
         link = _link;
+        registrar = _registrar;
+
+        registrationInfo = RegistrationData({
+            name: "",
+            encryptedEmail: "",
+            upkeepContract: address(0),
+            gasLimit: 200000,
+            adminAddress: msg.sender,
+            triggerType: 0,
+            checkData: "",
+            triggerConfig: "",
+            offchainConfig: "",
+            amount: 0
+        });
     }
 
     function createCustomDerivative(
@@ -53,6 +84,54 @@ contract DerivativeFactory is Ownable {
         emit DerivativeCreated(address(newCustomDerivative), msg.sender);
 
         return address(newCustomDerivative);
+    }
+
+    function registerUpkeepForDeployedContract(address deployedContract) public returns (bool) {
+        registrationInfo.upkeepContract = deployedContract;
+
+        bytes memory registrationData = abi.encode(
+            registrationInfo.name,
+            registrationInfo.encryptedEmail,
+            registrationInfo.upkeepContract,
+            registrationInfo.gasLimit,
+            registrationInfo.adminAddress,
+            registrationInfo.triggerType,
+            registrationInfo.checkData,
+            registrationInfo.triggerConfig,
+            registrationInfo.offchainConfig,
+            registrationInfo.amount
+        );
+
+        LinkTokenInterface(link).transferAndCall(registrar, registrationInfo.amount, registrationData);
+        bool success = LinkTokenInterface(link).transferAndCall(registrar, registrationInfo.amount, registrationData);
+        if (!success) revert DerivativeFactory__LinkTransferAndCallFailed();
+        return success;
+    }
+
+    function updateRegistrationData(
+        string calldata newName,
+        bytes calldata newEncryptedEmail,
+        address newUpkeepContract,
+        uint32 newGasLimit,
+        address newAdminAddress,
+        uint8 newTriggerType,
+        bytes calldata newCheckData,
+        bytes calldata newTriggerConfig,
+        bytes calldata newOffchainConfig,
+        uint96 newAmount
+    ) external onlyOwner {
+        registrationInfo = RegistrationData({
+            name: newName,
+            encryptedEmail: newEncryptedEmail,
+            upkeepContract: newUpkeepContract,
+            gasLimit: newGasLimit,
+            adminAddress: newAdminAddress,
+            triggerType: newTriggerType,
+            checkData: newCheckData,
+            triggerConfig: newTriggerConfig,
+            offchainConfig: newOffchainConfig,
+            amount: newAmount
+        });
     }
 
     function withdrawLink() public onlyOwner {
