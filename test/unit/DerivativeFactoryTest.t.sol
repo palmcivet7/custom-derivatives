@@ -35,7 +35,7 @@ contract DerivativeFactoryTest is Test {
 
     function setUp() external {
         DeployDerivativeFactory deployer = new DeployDerivativeFactory();
-        (derivativeFactory) = deployer.run();
+        (derivativeFactory,) = deployer.run();
         MockV3Aggregator mockPriceFeed = new MockV3Aggregator(DECIMALS, ASSET_USD_PRICE);
         priceFeed = address(mockPriceFeed);
         MockUSDC mockUsdc = new MockUSDC();
