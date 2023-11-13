@@ -9,10 +9,17 @@ import {CustomDerivative} from "../../src/CustomDerivative.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 import {MockUSDC} from "../mocks/MockUSDC.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
+import {HelperReceiverConfig} from "../../script/HelperReceiverConfig.s.sol";
 
 contract DerivativeFactoryTest is Test {
     DerivativeFactory derivativeFactory;
     CustomDerivative customDerivative;
+    HelperReceiverConfig helperConfig;
+
+    address linkAddress;
+    address routerAddress;
+    address registrarAddress;
 
     uint8 public constant DECIMALS = 8;
     int256 public constant ASSET_USD_PRICE = 2000e8;
@@ -35,11 +42,14 @@ contract DerivativeFactoryTest is Test {
 
     function setUp() external {
         DeployDerivativeFactory deployer = new DeployDerivativeFactory();
-        (derivativeFactory,) = deployer.run();
+        (derivativeFactory, helperConfig) = deployer.run();
+        (linkAddress, routerAddress, registrarAddress) = helperConfig.activeNetworkConfig();
         MockV3Aggregator mockPriceFeed = new MockV3Aggregator(DECIMALS, ASSET_USD_PRICE);
         priceFeed = address(mockPriceFeed);
         MockUSDC mockUsdc = new MockUSDC();
         collateralToken = address(mockUsdc);
+        vm.prank(msg.sender);
+        LinkTokenInterface(linkAddress).transfer(address(derivativeFactory), USER_BALANCE);
     }
 
     modifier longContract() {
