@@ -172,6 +172,11 @@ contract CustomDerivative is AutomationCompatible {
     //////// Settlement ////////////
     ///////////////////////////////
 
+    /**
+     * @notice This function checks if the settlement time has been reached using Chainlink Automation.
+     * @dev This Chainlink Automation implementation uses custom logic that is evaluated off-chain.
+     * @return upkeepNeeded This will be true when the settlement time has been reached.
+     */
     function checkUpkeep(bytes calldata /* checkData */ )
         external
         view
@@ -182,6 +187,10 @@ contract CustomDerivative is AutomationCompatible {
         return (upkeepNeeded, bytes(""));
     }
 
+    /**
+     * @notice This function uses Chainlink Automation to call the settleContract() function
+     * when checkUpkeep() returns true.
+     */
     function performUpkeep(bytes calldata /* performData */ ) external {
         settleContract();
     }
