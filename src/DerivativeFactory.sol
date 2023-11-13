@@ -64,7 +64,6 @@ contract DerivativeFactory is Ownable {
         bytes memory registrationData =
             abi.encode("", "", _deployedContract, 200000, owner(), 0, "0x", "0x", "0x", 1000000000000000000);
 
-        LinkTokenInterface(link).transferAndCall(registrar, 1000000000000000000, registrationData);
         bool success = LinkTokenInterface(link).transferAndCall(registrar, 1000000000000000000, registrationData);
         if (!success) revert DerivativeFactory__LinkTransferAndCallFailed();
         return success;
