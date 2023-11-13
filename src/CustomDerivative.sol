@@ -14,7 +14,7 @@ import {AutomationCompatible} from "@chainlink/contracts/src/v0.8/automation/Aut
  * @notice This contract contains the main logic for our the derivative agreement between parties.
  */
 
-contract CustomDerivative {
+contract CustomDerivative is AutomationCompatible {
     error CustomDerivative__CounterpartyAlreadyAgreed();
     error CustomDerivative__AddressCannotBeBothParties();
     error CustomDerivative__OnlyPartiesCanDeposit();
@@ -172,6 +172,20 @@ contract CustomDerivative {
     //////// Settlement ////////////
     ///////////////////////////////
 
+    function checkUpkeep(bytes calldata /* checkData */ )
+        external
+        view
+        cannotExecute
+        returns (bool upkeepNeeded, bytes memory /* performData */ )
+    {
+        upkeepNeeded = (block.timestamp >= settlementTime);
+        return (upkeepNeeded, bytes(""));
+    }
+
+    function performUpkeep(bytes calldata /* performData */ ) external {
+        settleContract();
+    }
+
     /**
      * @notice This function settles the contract. It can only be called after the settlementTime has passed
      * and if both parties have deposited their collateral.
@@ -181,7 +195,7 @@ contract CustomDerivative {
      * potentially be to use Chainlink Automation or Chainlink Data Streams.
      * @dev Chainlink PriceFeeds are used to retrieve the price of the underlying asset.
      */
-    function settleContract() external notSettledOrCancelled {
+    function settleContract() public notSettledOrCancelled {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
         if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
 
