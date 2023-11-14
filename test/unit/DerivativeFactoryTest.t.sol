@@ -40,6 +40,8 @@ contract DerivativeFactoryTest is Test {
     address public PARTY_B = makeAddr("PARTY_B");
     address public RANDOM_USER = makeAddr("RANDOM_USER");
     uint256 public USER_BALANCE = 1000 ether;
+    address private constant DEVELOPER = 0xe0141DaBb4A8017330851f99ff8fc34aa619BBFD;
+    uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
     function setUp() external {
         DeployDerivativeFactory deployer = new DeployDerivativeFactory();
@@ -220,10 +222,17 @@ contract DerivativeFactoryTest is Test {
     {
         vm.warp(block.timestamp + 11 minutes);
         uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
+        uint256 devStartingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
         vm.prank(PARTY_A);
         customDerivative.settleContract();
+
+        uint256 developerFee = ((COLLATERAL_AMOUNT * 2) * DEVELOPER_FEE_PERCENTAGE) / 100;
+        uint256 winnerAmount = (COLLATERAL_AMOUNT * 2) - developerFee;
+
         uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
-        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        uint256 devEndingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
+        assertEq(startingBalance + winnerAmount, endingBalance);
+        assertEq(devStartingBalance + developerFee, devEndingBalance);
         assertEq(customDerivative.contractSettled(), true);
     }
 
@@ -235,10 +244,17 @@ contract DerivativeFactoryTest is Test {
     {
         vm.warp(block.timestamp + 11 minutes);
         uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        uint256 devStartingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
         vm.prank(PARTY_A);
         customDerivative.settleContract();
+
+        uint256 developerFee = ((COLLATERAL_AMOUNT * 2) * DEVELOPER_FEE_PERCENTAGE) / 100;
+        uint256 winnerAmount = (COLLATERAL_AMOUNT * 2) - developerFee;
+
         uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
-        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        uint256 devEndingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
+        assertEq(startingBalance + winnerAmount, endingBalance);
+        assertEq(devStartingBalance + developerFee, devEndingBalance);
         assertEq(customDerivative.contractSettled(), true);
     }
 
@@ -250,10 +266,15 @@ contract DerivativeFactoryTest is Test {
     {
         vm.warp(block.timestamp + 11 minutes);
         uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
+        uint256 devStartingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
         vm.prank(PARTY_A);
         customDerivative.settleContract();
+        uint256 developerFee = ((COLLATERAL_AMOUNT * 2) * DEVELOPER_FEE_PERCENTAGE) / 100;
+        uint256 winnerAmount = (COLLATERAL_AMOUNT * 2) - developerFee;
         uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_B);
-        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        uint256 devEndingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
+        assertEq(startingBalance + winnerAmount, endingBalance);
+        assertEq(devStartingBalance + developerFee, devEndingBalance);
         assertEq(customDerivative.contractSettled(), true);
     }
 
@@ -266,9 +287,14 @@ contract DerivativeFactoryTest is Test {
         vm.warp(block.timestamp + 11 minutes);
         uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
         vm.prank(PARTY_A);
+        uint256 devStartingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
         customDerivative.settleContract();
+        uint256 developerFee = ((COLLATERAL_AMOUNT * 2) * DEVELOPER_FEE_PERCENTAGE) / 100;
+        uint256 winnerAmount = (COLLATERAL_AMOUNT * 2) - developerFee;
         uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
-        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
+        uint256 devEndingBalance = MockUSDC(collateralToken).balanceOf(DEVELOPER);
+        assertEq(startingBalance + winnerAmount, endingBalance);
+        assertEq(devStartingBalance + developerFee, devEndingBalance);
         assertEq(customDerivative.contractSettled(), true);
     }
 
@@ -279,11 +305,8 @@ contract DerivativeFactoryTest is Test {
         bothPartiesDeposited
     {
         vm.warp(block.timestamp + 11 minutes);
-        uint256 startingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
         vm.startPrank(PARTY_A);
         customDerivative.settleContract();
-        uint256 endingBalance = MockUSDC(collateralToken).balanceOf(PARTY_A);
-        assertEq(startingBalance + (COLLATERAL_AMOUNT * 2), endingBalance);
         assertEq(customDerivative.contractSettled(), true);
         vm.expectRevert(CustomDerivative.CustomDerivative__ContractAlreadySettled.selector);
         customDerivative.settleContract();
