@@ -202,9 +202,9 @@ contract CustomDerivative is AutomationCompatible {
      * @notice This function settles the contract. It can only be called after the settlementTime has passed
      * and if both parties have deposited their collateral.
      * It pays out both parties collateral to the party who's long or short position was correct.
-     * NOTE: It currently pays out when the function is called as long as settlementTime has passed -
-     * ideally it should pay out immediately when settlementTime occurs. The solution to this would
-     * potentially be to use Chainlink Automation or Chainlink Data Streams.
+     * //  * NOTE: It currently pays out when the function is called as long as settlementTime has passed -
+     * //  * ideally it should pay out immediately when settlementTime occurs. The solution to this would
+     * //  * potentially be to use Chainlink Automation or Chainlink Data Streams.
      * @dev Chainlink PriceFeeds are used to retrieve the price of the underlying asset.
      * @notice A 2% fee is taken from the total collateral and sent to the developer address
      * for every successful derivative settlement.
@@ -256,9 +256,10 @@ contract CustomDerivative is AutomationCompatible {
     function setCancelPartyA() external notSettledOrCancelled {
         if (msg.sender != partyA) revert CustomDerivative__OnlyPartyACanCall();
         partyACancel = true;
-        emit PartyRequestedCancellation(msg.sender);
         if (partyBCancel) {
             _cancelContract();
+        } else {
+            emit PartyRequestedCancellation(msg.sender);
         }
     }
 
@@ -269,9 +270,10 @@ contract CustomDerivative is AutomationCompatible {
     function setCancelPartyB() external notSettledOrCancelled {
         if (msg.sender != partyB) revert CustomDerivative__OnlyPartyBCanCall();
         partyBCancel = true;
-        emit PartyRequestedCancellation(msg.sender);
         if (partyACancel) {
             _cancelContract();
+        } else {
+            emit PartyRequestedCancellation(msg.sender);
         }
     }
 
