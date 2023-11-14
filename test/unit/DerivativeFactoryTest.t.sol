@@ -11,6 +11,7 @@ import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 import {MockUSDC} from "../mocks/MockUSDC.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import {HelperReceiverConfig} from "../../script/HelperReceiverConfig.s.sol";
+import {MockLinkToken} from "@chainlink/contracts/src/v0.8/mocks/MockLinkToken.sol";
 
 contract DerivativeFactoryTest is Test {
     DerivativeFactory derivativeFactory;
@@ -48,8 +49,7 @@ contract DerivativeFactoryTest is Test {
         priceFeed = address(mockPriceFeed);
         MockUSDC mockUsdc = new MockUSDC();
         collateralToken = address(mockUsdc);
-        vm.prank(msg.sender);
-        LinkTokenInterface(linkAddress).transfer(address(derivativeFactory), USER_BALANCE);
+        MockLinkToken(linkAddress).setBalance(address(derivativeFactory), USER_BALANCE);
     }
 
     modifier longContract() {
