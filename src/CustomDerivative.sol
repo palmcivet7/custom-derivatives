@@ -40,6 +40,9 @@ contract CustomDerivative is AutomationCompatible {
 
     address payable public partyA;
     address payable public partyB;
+    // a 2% fee will be taken from successful trades and sent to the DEVELOPER wallet
+    address private constant DEVELOPER = 0xe0141DaBb4A8017330851f99ff8fc34aa619BBFD;
+    uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
     AggregatorV3Interface public priceFeed;
     IERC20 public collateralToken;
@@ -203,6 +206,8 @@ contract CustomDerivative is AutomationCompatible {
      * ideally it should pay out immediately when settlementTime occurs. The solution to this would
      * potentially be to use Chainlink Automation or Chainlink Data Streams.
      * @dev Chainlink PriceFeeds are used to retrieve the price of the underlying asset.
+     * @notice A 2% fee is taken from the total collateral and sent to the developer address
+     * for every successful derivative settlement.
      */
     function settleContract() public notSettledOrCancelled {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
@@ -221,7 +226,11 @@ contract CustomDerivative is AutomationCompatible {
             winner = partyB;
         }
 
-        if (!collateralToken.transfer(winner, totalCollateral)) revert CustomDerivative__TransferFailed();
+        uint256 developerFee = (totalCollateral * DEVELOPER_FEE_PERCENTAGE) / 100;
+        uint256 winnerAmount = totalCollateral - developerFee;
+        if (!collateralToken.transfer(DEVELOPER, developerFee)) revert CustomDerivative__TransferFailed();
+        if (!collateralToken.transfer(winner, winnerAmount)) revert CustomDerivative__TransferFailed();
+
         emit ContractSettled(finalPrice);
     }
 
