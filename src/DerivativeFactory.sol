@@ -22,12 +22,31 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * we need to register it with Chainlink Automation using registerUpkeepForDeployedContract().
  */
 
+struct RegistrationParams {
+    string name;
+    bytes encryptedEmail;
+    address upkeepContract;
+    uint32 gasLimit;
+    address adminAddress;
+    uint8 triggerType;
+    bytes checkData;
+    bytes triggerConfig;
+    bytes offchainConfig;
+    uint96 amount;
+}
+
+interface AutomationRegistrarInterface {
+    function registerUpkeep(RegistrationParams calldata requestParams) external returns (uint256);
+}
+
 contract DerivativeFactory is Ownable {
     error DerivativeFactory__NoLinkToWithdraw();
     error DerivativeFactory__LinkTransferFailed();
     error DerivativeFactory__LinkTransferAndCallFailed();
+    error DerivativeFactory__AutomationRegistrationFailed();
 
     event DerivativeCreated(address derivativeContract, address partyA);
+    event UpkeepRegistered(uint256 upkeepID, address derivativeContract);
 
     address public link;
     address public registrar;
@@ -41,7 +60,7 @@ contract DerivativeFactory is Ownable {
         address priceFeed, // underlying asset
         uint256 strikePrice,
         uint256 settlementTime,
-        address collateralToken, // USDC
+        address collateralToken,
         uint256 collateralAmount,
         bool isPartyALong
     ) public returns (address) {
@@ -56,17 +75,31 @@ contract DerivativeFactory is Ownable {
         );
 
         emit DerivativeCreated(address(newCustomDerivative), msg.sender);
-        registerUpkeepForDeployedContract(address(newCustomDerivative));
+        registerAndPredictID(address(newCustomDerivative));
         return address(newCustomDerivative);
     }
 
-    function registerUpkeepForDeployedContract(address _deployedContract) public returns (bool) {
-        bytes memory registrationData =
-            abi.encode("", "", _deployedContract, 200000, owner(), 0, "0x", "0x", "0x", 1000000000000000000);
+    function registerAndPredictID(address _deployedContract) public {
+        RegistrationParams memory params = RegistrationParams({
+            name: "",
+            encryptedEmail: hex"",
+            upkeepContract: _deployedContract,
+            gasLimit: 2000000,
+            adminAddress: owner(),
+            triggerType: 0,
+            checkData: hex"",
+            triggerConfig: hex"",
+            offchainConfig: hex"",
+            amount: 1000000000000000000
+        });
 
-        bool success = LinkTokenInterface(link).transferAndCall(registrar, 1000000000000000000, registrationData);
-        if (!success) revert DerivativeFactory__LinkTransferAndCallFailed();
-        return success;
+        LinkTokenInterface(link).approve(registrar, params.amount);
+        uint256 upkeepID = AutomationRegistrarInterface(registrar).registerUpkeep(params);
+        if (upkeepID != 0) {
+            emit UpkeepRegistered(upkeepID, _deployedContract);
+        } else {
+            revert DerivativeFactory__AutomationRegistrationFailed();
+        }
     }
 
     function withdrawLink() public onlyOwner {

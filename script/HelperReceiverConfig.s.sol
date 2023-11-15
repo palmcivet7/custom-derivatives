@@ -7,7 +7,7 @@ import {Router} from "@chainlink/contracts/src/v0.8/ccip/Router.sol";
 import {MockARM} from "@chainlink/contracts/src/v0.8/ccip/test/mocks/MockARM.sol";
 import {WETH9} from "@chainlink/contracts/src/v0.8/ccip/test/WETH9.sol";
 import {MockLinkToken} from "@chainlink/contracts/src/v0.8/mocks/MockLinkToken.sol";
-import {KeeperRegistrar1_2Mock} from "@chainlink/contracts/src/v0.8/automation/mocks/KeeperRegistrar1_2Mock.sol";
+// import {AutomationRegistrar2_1} from "@chainlink/contracts/src/v0.8/automation/v2_1/AutomationRegistrar2_1.sol";
 
 contract HelperReceiverConfig is Script {
     struct NetworkConfig {
@@ -32,7 +32,7 @@ contract HelperReceiverConfig is Script {
         return NetworkConfig({
             link: 0x779877A7B0D9E8603169DdbD7836e478b4624789, // https://sepolia.etherscan.io/token/0x779877a7b0d9e8603169ddbd7836e478b4624789
             router: 0xD0daae2231E9CB96b94C8512223533293C3693Bf, // https://docs.chain.link/ccip/supported-networks#ethereum-sepolia
-            registrar: 0x9a811502d843E5a03913d5A2cfb646c11463467A // https://docs.chain.link/chainlink-automation/overview/supported-networks#sepolia-testnet
+            registrar: 0xb0E49c5D0d05cbc241d68c05BC5BA1d1B7B72976 // https://docs.chain.link/chainlink-automation/overview/supported-networks#sepolia-testnet
         });
     }
 
@@ -49,7 +49,8 @@ contract HelperReceiverConfig is Script {
         WETH9 weth9 = new WETH9();
         MockARM mockArm = new MockARM();
         Router router = new Router(address(weth9), address(mockArm));
-        KeeperRegistrar1_2Mock registrar = new KeeperRegistrar1_2Mock();
+        // AutomationRegistrar2_1 registrar = new AutomationRegistrar2_1();
+        address registrar;
         return NetworkConfig({link: address(mockLink), router: address(router), registrar: address(registrar)});
     }
 }
