@@ -79,7 +79,7 @@ contract DerivativeFactory is Ownable {
         return address(newCustomDerivative);
     }
 
-    function registerAndPredictID(address _deployedContract) public {
+    function registerAndPredictID(address _deployedContract) private {
         RegistrationParams memory params = RegistrationParams({
             name: "",
             encryptedEmail: hex"",
