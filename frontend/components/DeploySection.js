@@ -101,26 +101,28 @@ const DeploySection = () => {
 
             {/* Radio buttons for long/short position */}
             <div className={styles.formElement}>
-              <label>
-                <input
-                  type="radio"
-                  name="position"
-                  value="long"
-                  checked={formData.position === "long"}
-                  onChange={() => handlePositionChange("long")}
-                />
-                Long Position
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="position"
-                  value="short"
-                  checked={formData.position === "short"}
-                  onChange={() => handlePositionChange("short")}
-                />
-                Short Position
-              </label>
+              <div className={styles.tradePosition}>
+                <label>
+                  <input
+                    type="radio"
+                    name="position"
+                    value="long"
+                    checked={formData.position === "long"}
+                    onChange={() => handlePositionChange("long")}
+                  />
+                  Long Position
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="position"
+                    value="short"
+                    checked={formData.position === "short"}
+                    onChange={() => handlePositionChange("short")}
+                  />
+                  Short Position
+                </label>
+              </div>
             </div>
 
             <div className={styles.buttons}>

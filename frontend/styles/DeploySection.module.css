@@ -1,25 +1,58 @@
-/* DeploySection.module.css */
 .modal {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 10px; /* Adjust the gap between form elements as needed */
+  border: 2px solid white; /* White border for the form */
+  padding: 20px; /* Padding around the form */
+  border-radius: 10px; /* Rounded corners for the form */
+  background: #f5f5f5; /* Light background for the form */
 }
 
 .formElement {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  margin-bottom: 20px; /* Space below each form element */
+}
+
+.formElement:last-child {
+  margin-bottom: 0; /* Remove bottom margin for the last element */
+}
+
+.formElement select,
+.formElement input {
+  padding: 8px;
+  border: 1px solid #ccc; /* Border for form inputs */
+  border-radius: 5px; /* Rounded corners for inputs */
+  font-size: 1rem; /* Font size for inputs */
+  color: #333; /* Text color */
+  background: white; /* Background color */
+  outline: none; /* Remove default outline */
+}
+
+.formElement select:hover,
+.formElement input:hover {
+  border-color: #888; /* Change border color on hover */
+}
+
+.formElement select:focus,
+.formElement input:focus {
+  border-color: #007bff; /* Change border color on focus */
+}
+
+.tradePosition {
+  color: #333;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .buttons {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
 }
 
-/* Optional: Style for form labels */
 .label {
   margin-bottom: 5px;
   font-weight: bold;
+  color: #333; /* Color for labels */
 }
