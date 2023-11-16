@@ -46,13 +46,69 @@
   justify-content: center;
 }
 
+.label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333; /* Color for labels */
+}
+
 .buttons {
   display: flex;
   justify-content: space-between;
 }
 
-.label {
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #333; /* Color for labels */
+.buttons button[type="submit"] {
+  /* Styles for the 'Deploy Contract' button */
+  background-color: #28a745; /* A soft green color */
+  color: white; /* White text color */
+  border: none; /* No border */
+  padding: 8px 15px; /* Padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Cursor changes to pointer on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+.buttons button[type="submit"]:hover {
+  background-color: #218838; /* Slightly darker green on hover */
+}
+
+.buttons button[type="cancel"] {
+  /* Styles for the 'Cancel' button */
+  background-color: #ff4d4f; /* A soft red color */
+  color: white; /* White text color */
+  border: none; /* No border */
+  padding: 8px 15px; /* Padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Cursor changes to pointer on hover */
+  transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+.buttons button[type="cancel"]:hover {
+  background-color: #ff3333; /* Slightly darker red on hover */
+}
+
+.dateTimePlaceholder {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  text-align: left; /* Align text to the left */
+}
+
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+
+.successMessage {
+  border: 2px solid #28a745;
+  padding: 20px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  text-align: center;
 }
