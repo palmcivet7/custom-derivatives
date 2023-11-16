@@ -19,13 +19,15 @@
 }
 
 .emptyDiv {
-  width: 100px;
+  margin: 10px;
+  width: 300px;
   display: flex;
   align-items: center;
 }
 
 .buttonDiv {
-  width: 100px;
+  margin: 10px;
+  width: 300px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

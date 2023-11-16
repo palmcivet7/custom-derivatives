@@ -1,5 +1,6 @@
 // components/DeploySection.js
 import React, { useState } from "react";
+import styles from "../styles/DeploySection.module.css";
 
 const DeploySection = () => {
   const [showModal, setShowModal] = useState(false);

@@ -1,6 +1,5 @@
 // components/ConnectWalletButton.js
 import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
 
 const ConnectWalletButton = () => {
   const [walletAddress, setWalletAddress] = useState("");
@@ -43,16 +42,7 @@ const ConnectWalletButton = () => {
   };
 
   return (
-    <button
-      onClick={connectWallet}
-      style={{
-        padding: "10px 15px",
-        background: "blue",
-        color: "white",
-        border: "none",
-        borderRadius: "5px",
-      }}
-    >
+    <button onClick={connectWallet}>
       {walletAddress
         ? `Connected: ${walletAddress.substring(
             0,
