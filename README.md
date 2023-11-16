@@ -1,5 +1,7 @@
 # Constellation Solo Project
 
+REMINDER TO DELETE TEMPORARY SEPOLIA RPC AND ETHERSCAN API IN FRONTEND CONSTANTS
+
 This is my solo project for the Chainlink Constellation Hackathon.
 
 The project consists of a `Factory` contract and a `Custom` contract
