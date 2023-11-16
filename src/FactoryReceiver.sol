@@ -12,6 +12,7 @@ contract FactoryReceiver is DerivativeFactory, CCIPReceiver {
     {}
 
     function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
+        address _partyA;
         address _priceFeed;
         uint256 _strikePrice;
         uint256 _settlementTime;
@@ -19,11 +20,11 @@ contract FactoryReceiver is DerivativeFactory, CCIPReceiver {
         uint256 _collateralAmount;
         bool _isPartyALong;
 
-        (_priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong) =
-            abi.decode(message.data, (address, uint256, uint256, address, uint256, bool));
+        (_partyA, _priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong) =
+            abi.decode(message.data, (address, address, uint256, uint256, address, uint256, bool));
 
         createCustomDerivative(
-            _priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong
+            _partyA, _priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong
         );
     }
 }

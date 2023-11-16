@@ -163,8 +163,13 @@ const DeploySection = () => {
   return (
     <div>
       <p>
-        Create a custom derivative contract and deploy on your chain of choice
+        Create a custom derivative contract and deploy on your chain of choice.{" "}
       </p>
+      <p>
+        Please make sure your wallet is connected and you are on Avalanche Fuji
+        testnet for the initial tx.{" "}
+      </p>
+
       {!showModal && (
         <button onClick={() => setShowModal(true)}>Create Contract</button>
       )}

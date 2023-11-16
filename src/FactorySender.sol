@@ -30,7 +30,15 @@ contract FactorySender is Ownable {
     ) public {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(_receiver),
-            data: abi.encode(_priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong),
+            data: abi.encode(
+                payable(msg.sender),
+                _priceFeed,
+                _strikePrice,
+                _settlementTime,
+                _collateralToken,
+                _collateralAmount,
+                _isPartyALong
+                ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 4000000, strict: false})),
             feeToken: link

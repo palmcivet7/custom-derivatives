@@ -803,3 +803,6 @@ export const SEPOLIA_MOCK_USDC_TOKEN_ADDRESS =
 export const ETHERSCAN_API_KEY = "TIYSF9CQSIGQU583U2NZH6E71HIEBQTBFD";
 
 export const ETHERSCAN_API_URL = "https://api-sepolia.etherscan.io/api";
+
+export const SEPOLIA_RPC_URL =
+  "https://eth-sepolia.g.alchemy.com/v2/Samr4-_Ei5Ib9FjZ7bv1_NgqXuDUmHIq";

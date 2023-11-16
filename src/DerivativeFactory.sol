@@ -57,6 +57,7 @@ contract DerivativeFactory is Ownable {
     }
 
     function createCustomDerivative(
+        address payable partyA,
         address priceFeed, // underlying asset
         uint256 strikePrice,
         uint256 settlementTime,
@@ -65,7 +66,7 @@ contract DerivativeFactory is Ownable {
         bool isPartyALong
     ) public returns (address) {
         CustomDerivative newCustomDerivative = new CustomDerivative(
-            payable(msg.sender),
+            partyA,
             priceFeed,
             strikePrice,
             settlementTime,
