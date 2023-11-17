@@ -75,7 +75,7 @@ contract DerivativeFactory is Ownable {
             isPartyALong
         );
 
-        emit DerivativeCreated(address(newCustomDerivative), msg.sender);
+        emit DerivativeCreated(address(newCustomDerivative), partyA);
         registerAndPredictID(address(newCustomDerivative));
         return address(newCustomDerivative);
     }
@@ -85,7 +85,7 @@ contract DerivativeFactory is Ownable {
             name: "",
             encryptedEmail: hex"",
             upkeepContract: _deployedContract,
-            gasLimit: 2000000,
+            gasLimit: 4000000,
             adminAddress: owner(),
             triggerType: 0,
             checkData: hex"",
