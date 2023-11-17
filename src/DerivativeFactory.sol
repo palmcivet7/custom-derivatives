@@ -85,7 +85,7 @@ contract DerivativeFactory is Ownable {
             name: "",
             encryptedEmail: hex"",
             upkeepContract: _deployedContract,
-            gasLimit: 4000000,
+            gasLimit: 2000000,
             adminAddress: owner(),
             triggerType: 0,
             checkData: hex"",

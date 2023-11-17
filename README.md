@@ -22,7 +22,17 @@ The project consists of a `Factory` contract and a `Custom` contract
 
 [Mock USDC Contract on Sepolia](https://sepolia.etherscan.io/address/0x679dc61439ee95b27ac931a4e8b0943f25ad0f54#writeContract)
 
+---
+
+passing msg.sender but no $5 fee
+
+[fuji sender, no msg.value](https://testnet.snowtrace.io/address/0x98be1c31fb80d1760604775fa6027025e436ad70#writeContract)
+
 [Tx with more explicit features - passing msg.sender](https://ccip.chain.link/msg/0xa294064a151edd136816f2cabb1bac5c81394bff3c6cbc50b75f8604666b9ec4)
+
+[tx no msg.value, but passing msg.sender](https://ccip.chain.link/msg/0x0999c8565913b5d8f4d9c639e1a776fe8fa23973958d51466867d922988afc9b)
+
+[Receiver Sepolia](https://sepolia.etherscan.io/address/0xa76f758e860053b100184eca3faacf37e6ea4f48#code)
 
 ---
 

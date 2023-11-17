@@ -117,6 +117,11 @@ export const CUSTOM_DERIVATIVE_ABI = [
   },
   {
     inputs: [],
+    name: "CustomDerivative__SettlementTimeNeedsToBeInFuture",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "CustomDerivative__SettlementTimeNotReached",
     type: "error",
   },
@@ -515,23 +520,54 @@ export const CUSTOM_DERIVATIVE_ABI = [
 ];
 
 export const FUJI_FACTORY_SENDER_ADDRESS =
-  "0x272c807e598fdef5df8bb999defbd6223898f26c";
+  "0x98be1c31Fb80d1760604775fa6027025E436ad70";
 
 export const FUJI_FACTORY_SENDER_ABI = [
   {
     inputs: [
       { internalType: "address", name: "_link", type: "address" },
       { internalType: "address", name: "_router", type: "address" },
-      { internalType: "address", name: "_priceFeed", type: "address" },
+      { internalType: "address", name: "_registrar", type: "address" },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
   },
-  { inputs: [], name: "FactorySender__LinkTransferFailed", type: "error" },
-  { inputs: [], name: "FactorySender__NoLinkToWithdraw", type: "error" },
-  { inputs: [], name: "FactorySender__NotEnoughPayment", type: "error" },
-  { inputs: [], name: "FactorySender__NothingToWithdraw", type: "error" },
-  { inputs: [], name: "FactorySender__TransferFailed", type: "error" },
+  {
+    inputs: [],
+    name: "DerivativeFactory__AutomationRegistrationFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "DerivativeFactory__LinkTransferAndCallFailed",
+    type: "error",
+  },
+  { inputs: [], name: "DerivativeFactory__LinkTransferFailed", type: "error" },
+  { inputs: [], name: "DerivativeFactory__NoLinkToWithdraw", type: "error" },
+  {
+    inputs: [{ internalType: "address", name: "router", type: "address" }],
+    name: "InvalidRouter",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "derivativeContract",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "partyA",
+        type: "address",
+      },
+    ],
+    name: "DerivativeCreated",
+    type: "event",
+  },
   {
     anonymous: false,
     inputs: [
@@ -552,29 +588,75 @@ export const FUJI_FACTORY_SENDER_ABI = [
     type: "event",
   },
   {
+    anonymous: false,
     inputs: [
-      { internalType: "address", name: "_receiver", type: "address" },
       {
-        internalType: "uint64",
-        name: "_destinationChainSelector",
-        type: "uint64",
+        indexed: false,
+        internalType: "uint256",
+        name: "upkeepID",
+        type: "uint256",
       },
-      { internalType: "address", name: "_priceFeed", type: "address" },
-      { internalType: "uint256", name: "_strikePrice", type: "uint256" },
-      { internalType: "uint256", name: "_settlementTime", type: "uint256" },
-      { internalType: "address", name: "_collateralToken", type: "address" },
-      { internalType: "uint256", name: "_collateralAmount", type: "uint256" },
-      { internalType: "bool", name: "_isPartyALong", type: "bool" },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "derivativeContract",
+        type: "address",
+      },
     ],
-    name: "createCrossChainCustomDerivative",
+    name: "UpkeepRegistered",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          { internalType: "bytes32", name: "messageId", type: "bytes32" },
+          {
+            internalType: "uint64",
+            name: "sourceChainSelector",
+            type: "uint64",
+          },
+          { internalType: "bytes", name: "sender", type: "bytes" },
+          { internalType: "bytes", name: "data", type: "bytes" },
+          {
+            components: [
+              { internalType: "address", name: "token", type: "address" },
+              { internalType: "uint256", name: "amount", type: "uint256" },
+            ],
+            internalType: "struct Client.EVMTokenAmount[]",
+            name: "destTokenAmounts",
+            type: "tuple[]",
+          },
+        ],
+        internalType: "struct Client.Any2EVMMessage",
+        name: "message",
+        type: "tuple",
+      },
+    ],
+    name: "ccipReceive",
     outputs: [],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "address payable", name: "partyA", type: "address" },
+      { internalType: "address", name: "priceFeed", type: "address" },
+      { internalType: "uint256", name: "strikePrice", type: "uint256" },
+      { internalType: "uint256", name: "settlementTime", type: "uint256" },
+      { internalType: "address", name: "collateralToken", type: "address" },
+      { internalType: "uint256", name: "collateralAmount", type: "uint256" },
+      { internalType: "bool", name: "isPartyALong", type: "bool" },
+    ],
+    name: "createCustomDerivative",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [],
-    name: "getLatestPrice",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    name: "getRouter",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
@@ -594,7 +676,7 @@ export const FUJI_FACTORY_SENDER_ABI = [
   },
   {
     inputs: [],
-    name: "priceFeed",
+    name: "registrar",
     outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
@@ -607,22 +689,15 @@ export const FUJI_FACTORY_SENDER_ABI = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "router",
-    outputs: [{ internalType: "address", name: "", type: "address" }],
-    stateMutability: "view",
+    inputs: [{ internalType: "bytes4", name: "interfaceId", type: "bytes4" }],
+    name: "supportsInterface",
+    outputs: [{ internalType: "bool", name: "", type: "bool" }],
+    stateMutability: "pure",
     type: "function",
   },
   {
     inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
     name: "transferOwnership",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "withdraw",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -637,7 +712,7 @@ export const FUJI_FACTORY_SENDER_ABI = [
 ];
 
 export const SEPOLIA_FACTORY_RECEIVER_ADDRESS =
-  "0x53f3dd751b470f545356c14321bb1577cb73ae3b";
+  "0xa76f758E860053b100184EcA3FaaCf37e6eA4f48";
 
 export const SEPOLIA_FACTORY_RECEIVER_ABI = [
   {
@@ -757,6 +832,7 @@ export const SEPOLIA_FACTORY_RECEIVER_ABI = [
   },
   {
     inputs: [
+      { internalType: "address payable", name: "partyA", type: "address" },
       { internalType: "address", name: "priceFeed", type: "address" },
       { internalType: "uint256", name: "strikePrice", type: "uint256" },
       { internalType: "uint256", name: "settlementTime", type: "uint256" },

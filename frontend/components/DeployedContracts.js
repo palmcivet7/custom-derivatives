@@ -243,9 +243,19 @@ const DeployedContracts = () => {
                 </button>
                 <button
                   onClick={() => handleDeposit(contract, false)}
-                  disabled={contract.counterpartyDeposited}
+                  disabled={
+                    !connectedWallet ||
+                    connectedWallet.toLowerCase() ===
+                      contract.deployer.toLowerCase() ||
+                    contract.counterpartyDeposited
+                  }
                   className={`${styles.depositButton} ${
-                    contract.counterpartyDeposited ? styles.buttonDisabled : ""
+                    !connectedWallet ||
+                    connectedWallet.toLowerCase() ===
+                      contract.deployer.toLowerCase() ||
+                    contract.counterpartyDeposited
+                      ? styles.buttonDisabled
+                      : ""
                   }`}
                 >
                   {contract.counterpartyDeposited
