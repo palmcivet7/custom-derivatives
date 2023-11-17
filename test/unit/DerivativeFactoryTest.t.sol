@@ -57,7 +57,7 @@ contract DerivativeFactoryTest is Test {
     modifier longContract() {
         vm.prank(PARTY_A);
         customLong = derivativeFactory.createCustomDerivative(
-            priceFeed, STRIKE_PRICE, settlementTime, collateralToken, COLLATERAL_AMOUNT, long
+            payable(PARTY_A), priceFeed, STRIKE_PRICE, settlementTime, collateralToken, COLLATERAL_AMOUNT, long
         );
         customDerivative = CustomDerivative(customLong);
         _;
@@ -66,7 +66,7 @@ contract DerivativeFactoryTest is Test {
     modifier longContractDoubleStrike() {
         vm.prank(PARTY_A);
         customLong = derivativeFactory.createCustomDerivative(
-            priceFeed, STRIKE_PRICE * 2, settlementTime, collateralToken, COLLATERAL_AMOUNT, long
+            payable(PARTY_A), priceFeed, STRIKE_PRICE * 2, settlementTime, collateralToken, COLLATERAL_AMOUNT, long
         );
         customDerivative = CustomDerivative(customLong);
         _;
@@ -75,7 +75,7 @@ contract DerivativeFactoryTest is Test {
     modifier shortContract() {
         vm.prank(PARTY_A);
         customShort = derivativeFactory.createCustomDerivative(
-            priceFeed, STRIKE_PRICE, settlementTime, collateralToken, COLLATERAL_AMOUNT, notLong
+            payable(PARTY_A), priceFeed, STRIKE_PRICE, settlementTime, collateralToken, COLLATERAL_AMOUNT, notLong
         );
         customDerivative = CustomDerivative(customShort);
         _;
@@ -84,7 +84,7 @@ contract DerivativeFactoryTest is Test {
     modifier shortContractDoubleStrike() {
         vm.prank(PARTY_A);
         customShort = derivativeFactory.createCustomDerivative(
-            priceFeed, STRIKE_PRICE * 2, settlementTime, collateralToken, COLLATERAL_AMOUNT, notLong
+            payable(PARTY_A), priceFeed, STRIKE_PRICE * 2, settlementTime, collateralToken, COLLATERAL_AMOUNT, notLong
         );
         customDerivative = CustomDerivative(customShort);
         _;

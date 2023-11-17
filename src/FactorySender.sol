@@ -5,17 +5,23 @@ import {IRouterClient} from "@chainlink/contracts/src/v0.8/ccip/interfaces/IRout
 import {Client} from "@chainlink/contracts/src/v0.8/ccip/libraries/Client.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract FactorySender is Ownable {
+    error FactorySender__NotEnoughPayment();
+    error FactorySender__NothingToWithdraw();
     error FactorySender__NoLinkToWithdraw();
     error FactorySender__LinkTransferFailed();
+    error FactorySender__TransferFailed();
 
     address public link;
     address public router;
+    address public priceFeed;
 
-    constructor(address _link, address _router) {
+    constructor(address _link, address _router, address _priceFeed) {
         link = _link;
         router = _router;
+        priceFeed = _priceFeed;
     }
 
     function createCrossChainCustomDerivative(
@@ -27,7 +33,18 @@ contract FactorySender is Ownable {
         address _collateralToken,
         uint256 _collateralAmount,
         bool _isPartyALong
-    ) public {
+    ) public payable {
+        uint256 price = getLatestPrice();
+        uint256 mintingPrice = (5 * 10 ** 18 * 10 ** 8) / price;
+        if (msg.value < mintingPrice) {
+            revert FactorySender__NotEnoughPayment();
+        }
+
+        if (msg.value > mintingPrice) {
+            uint256 excessAmount = msg.value - mintingPrice;
+            payable(msg.sender).transfer(excessAmount);
+        }
+
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(_receiver),
             data: abi.encode(
@@ -47,6 +64,19 @@ contract FactorySender is Ownable {
         uint256 fees = IRouterClient(router).getFee(_destinationChainSelector, message);
         LinkTokenInterface(link).approve(address(router), fees);
         IRouterClient(router).ccipSend(_destinationChainSelector, message);
+    }
+
+    function getLatestPrice() public view returns (uint256) {
+        (, int256 price,,,) = AggregatorV3Interface(priceFeed).latestRoundData();
+        return uint256(price);
+    }
+
+    function withdraw() public onlyOwner {
+        uint256 balance = address(this).balance;
+        if (balance == 0) revert FactorySender__NothingToWithdraw();
+
+        (bool success,) = msg.sender.call{value: balance}("");
+        if (!success) revert FactorySender__TransferFailed();
     }
 
     function withdrawLink() public onlyOwner {

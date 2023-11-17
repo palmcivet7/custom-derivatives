@@ -24,7 +24,13 @@ contract FactoryReceiver is DerivativeFactory, CCIPReceiver {
             abi.decode(message.data, (address, address, uint256, uint256, address, uint256, bool));
 
         createCustomDerivative(
-            _partyA, _priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong
+            payable(_partyA),
+            _priceFeed,
+            _strikePrice,
+            _settlementTime,
+            _collateralToken,
+            _collateralAmount,
+            _isPartyALong
         );
     }
 }
