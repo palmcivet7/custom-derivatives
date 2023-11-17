@@ -52,27 +52,27 @@ const DeploySection = () => {
     setFormData({ ...formData, position });
   };
 
-  const calculateMintingPrice = async () => {
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const priceFeedContract = new ethers.Contract(
-        FUJI_AVAX_PRICE_FEED_ADDRESS,
-        FUJI_FACTORY_SENDER_ABI,
-        signer
-      );
+  // const calculateMintingPrice = async () => {
+  //   try {
+  //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+  //     const signer = provider.getSigner();
+  //     const priceFeedContract = new ethers.Contract(
+  //       FUJI_AVAX_PRICE_FEED_ADDRESS,
+  //       FUJI_FACTORY_SENDER_ABI,
+  //       signer
+  //     );
 
-      const price = await priceFeedContract.getLatestPrice(); // Assuming price is in Wei
-      const mintingPrice = ethers.utils
-        .parseUnits("5", 18)
-        .mul(ethers.constants.WeiPerEther)
-        .div(price);
-      return mintingPrice;
-    } catch (error) {
-      console.error("Error fetching latest price:", error);
-      return ethers.constants.Zero;
-    }
-  };
+  //     const price = await priceFeedContract.getLatestPrice(); // Assuming price is in Wei
+  //     const mintingPrice = ethers.utils
+  //       .parseUnits("5", 18)
+  //       .mul(ethers.constants.WeiPerEther)
+  //       .div(price);
+  //     return mintingPrice;
+  //   } catch (error) {
+  //     console.error("Error fetching latest price:", error);
+  //     return ethers.constants.Zero;
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -134,7 +134,7 @@ const DeploySection = () => {
       isPartyALong
     );
 
-    const mintingPrice = await calculateMintingPrice();
+    // const mintingPrice = await calculateMintingPrice();
 
     // Interact with the contract
     if (typeof window.ethereum !== "undefined") {
@@ -155,8 +155,8 @@ const DeploySection = () => {
           settlementTimeUnix,
           collateralTokenAddress,
           collateralAmountInWei,
-          isPartyALong,
-          { value: mintingPrice }
+          isPartyALong
+          // { value: mintingPrice }
         );
         const receipt = await tx.wait();
         setTxHash(receipt.transactionHash); // Update txHash state
