@@ -82,6 +82,16 @@ export const CUSTOM_DERIVATIVE_ABI = [
   },
   {
     inputs: [],
+    name: "CustomDerivative__InvalidAddress",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "CustomDerivative__NeedsToBeMoreThanZero",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "CustomDerivative__NotEnoughCollateral",
     type: "error",
   },
@@ -505,19 +515,23 @@ export const CUSTOM_DERIVATIVE_ABI = [
 ];
 
 export const FUJI_FACTORY_SENDER_ADDRESS =
-  "0xd2363623fA2A1864E445EcE2a39237d80960f501";
+  "0x272c807e598fdef5df8bb999defbd6223898f26c";
 
 export const FUJI_FACTORY_SENDER_ABI = [
   {
     inputs: [
       { internalType: "address", name: "_link", type: "address" },
       { internalType: "address", name: "_router", type: "address" },
+      { internalType: "address", name: "_priceFeed", type: "address" },
     ],
     stateMutability: "nonpayable",
     type: "constructor",
   },
   { inputs: [], name: "FactorySender__LinkTransferFailed", type: "error" },
   { inputs: [], name: "FactorySender__NoLinkToWithdraw", type: "error" },
+  { inputs: [], name: "FactorySender__NotEnoughPayment", type: "error" },
+  { inputs: [], name: "FactorySender__NothingToWithdraw", type: "error" },
+  { inputs: [], name: "FactorySender__TransferFailed", type: "error" },
   {
     anonymous: false,
     inputs: [
@@ -554,7 +568,14 @@ export const FUJI_FACTORY_SENDER_ABI = [
     ],
     name: "createCrossChainCustomDerivative",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getLatestPrice",
+    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -567,6 +588,13 @@ export const FUJI_FACTORY_SENDER_ABI = [
   {
     inputs: [],
     name: "owner",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "priceFeed",
     outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
@@ -594,6 +622,13 @@ export const FUJI_FACTORY_SENDER_ABI = [
   },
   {
     inputs: [],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "withdrawLink",
     outputs: [],
     stateMutability: "nonpayable",
@@ -602,7 +637,7 @@ export const FUJI_FACTORY_SENDER_ABI = [
 ];
 
 export const SEPOLIA_FACTORY_RECEIVER_ADDRESS =
-  "0x64000C2561305650367849F6D628DEF5947E91DA";
+  "0x53f3dd751b470f545356c14321bb1577cb73ae3b";
 
 export const SEPOLIA_FACTORY_RECEIVER_ABI = [
   {
@@ -960,3 +995,6 @@ export const ERC20_ABI = [
     type: "function",
   },
 ];
+
+export const FUJI_AVAX_PRICE_FEED_ADDRESS =
+  "0x5498BB86BC934c8D34FDA08E81D444153d0D06aD";
