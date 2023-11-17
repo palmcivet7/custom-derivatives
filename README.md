@@ -19,3 +19,5 @@ The project consists of a `Factory` contract and a `Custom` contract
 [Custom Contract Creation and Automation registration on Sepolia](https://sepolia.etherscan.io/tx/0xc39caa91fb81956fcacd205ba942e91bcd7bf5e1e78b34dcab1b8c5af04c1a74)
 
 [Custom Contract on Sepolia](https://sepolia.etherscan.io/address/0x51494844a5a5b9416e0f640f70e995063bb0ca42)
+
+[Mock USDC Contract on Sepolia](https://sepolia.etherscan.io/address/0x679dc61439ee95b27ac931a4e8b0943f25ad0f54#writeContract)

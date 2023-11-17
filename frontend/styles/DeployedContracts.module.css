@@ -1,0 +1,52 @@
+.deployedContractsList {
+  list-style-type: none;
+  padding: 0;
+}
+
+.deployedContractItem {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f8f8f8; /* Lighter background */
+  color: #333;
+  font-size: 1rem;
+}
+
+.deployedContractItem:hover {
+  border-color: #888;
+}
+
+.deployedContractItem p {
+  margin: 5px 0;
+}
+
+.deployedContractItem a {
+  color: #007bff; /* Link color */
+  text-decoration: none;
+}
+
+.deployedContractItem a:hover {
+  text-decoration: underline;
+}
+
+.deployedContractItem .buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.deployedContractItem .buttons button {
+  flex: 1; /* Each button will take equal space */
+  margin: 0 5px; /* Adjust the margin as needed for spacing */
+}
+
+.depositButton:disabled {
+  /* Add your styles for disabled buttons here */
+  cursor: not-allowed; /* Changes the cursor to indicate the button is disabled */
+  opacity: 0.5; /* Makes the button look faded */
+}
+
+.depositButton:disabled:hover {
+  /* Prevents hover styles on disabled buttons */
+  /* Reset or override any hover styles here */
+}
