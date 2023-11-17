@@ -8,6 +8,7 @@ import {
   ETHERSCAN_API_URL,
   CUSTOM_DERIVATIVE_ABI,
   SEPOLIA_RPC_URL,
+  ERC20_ABI,
 } from "../utils/constants";
 
 const DeployedContracts = () => {
@@ -133,9 +134,31 @@ const DeployedContracts = () => {
       signer
     );
 
+    const collateralTokenContract = new ethers.Contract(
+      contract.collateralAsset,
+      ERC20_ABI,
+      signer
+    );
+
     try {
       const collateralAmount = await contractInstance.collateralAmount();
       const amountInWei = collateralAmount.toString();
+
+      const allowance = await collateralTokenContract.allowance(
+        connectedWallet,
+        contract.address
+      );
+      if (allowance.lt(collateralAmount)) {
+        alert(
+          "This transaction is for approving the token transfer only, another transaction will have to be made for the deposit afterwards"
+        );
+        const approveTx = await collateralTokenContract.approve(
+          contract.address,
+          amountInWei
+        );
+        await approveTx.wait();
+      }
+
       let tx;
 
       if (
