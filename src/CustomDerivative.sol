@@ -15,6 +15,8 @@ import {AutomationCompatible} from "@chainlink/contracts/src/v0.8/automation/Aut
  */
 
 contract CustomDerivative is AutomationCompatible {
+    error CustomDerivative__InvalidAddress();
+    error CustomDerivative__NeedsToBeMoreThanZero();
     error CustomDerivative__CounterpartyAlreadyAgreed();
     error CustomDerivative__AddressCannotBeBothParties();
     error CustomDerivative__OnlyPartiesCanDeposit();
@@ -80,6 +82,11 @@ contract CustomDerivative is AutomationCompatible {
         uint256 _collateralAmount,
         bool _isPartyALong
     ) {
+        if (_partyA == address(0)) revert CustomDerivative__InvalidAddress();
+        if (_priceFeed == address(0)) revert CustomDerivative__InvalidAddress();
+        if (_strikePrice == 0) revert CustomDerivative__NeedsToBeMoreThanZero();
+        if (_collateralToken == address(0)) revert CustomDerivative__InvalidAddress();
+        if (_collateralAmount == 0) revert CustomDerivative__NeedsToBeMoreThanZero();
         partyA = _partyA;
         priceFeed = AggregatorV3Interface(_priceFeed);
         strikePrice = _strikePrice;
