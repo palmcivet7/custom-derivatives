@@ -134,7 +134,6 @@ contract CustomDerivative is AutomationCompatible {
         if (amount < _collateralAmount) revert CustomDerivative__NotEnoughCollateral();
         if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
 
-        IERC20(collateralToken).approve(address(this), amount);
         if (!collateralToken.transferFrom(sender, address(this), amount)) revert CustomDerivative__TransferFailed();
         uint256 excess = amount - _collateralAmount;
         if (excess > 0) {
