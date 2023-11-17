@@ -38,7 +38,7 @@ passing msg.sender but no $5 fee
 
 Explicit features - passing msg.sender and payable $5 avax
 
-[Sender on Fuji](https://testnet.snowtrace.io/address/0xd486a0e908582b25707df2adc0a350e77d6c9f9b#writeContract)
+[Sender on Fuji](https://testnet.snowtrace.io/address/0xd486a0e908582b25707df2adc0a350e77d6c9f9b#writeContract) with msg.value
 
 [CCIP TX](https://ccip.chain.link/msg/0x96d44c16f1f95fdcb93f0e6f8b250cb73bf0dc345be3da5d690615f532587478)
 
