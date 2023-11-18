@@ -41,22 +41,22 @@ contract CustomDerivative is AutomationCompatible {
     event CollateralWithdrawn(address withdrawer, uint256 amount);
     event PartyRequestedCancellation(address party);
 
-    address payable public partyA;
+    address payable public immutable partyA;
     address payable public partyB;
     // a 2% fee will be taken from successful trades and sent to the DEVELOPER wallet
     address private constant DEVELOPER = 0xe0141DaBb4A8017330851f99ff8fc34aa619BBFD;
     uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
-    AggregatorV3Interface public priceFeed;
-    IERC20 public collateralToken;
-    uint256 public strikePrice;
-    uint256 public settlementTime;
+    AggregatorV3Interface public immutable priceFeed;
+    IERC20 public immutable collateralToken;
+    uint256 public immutable strikePrice;
+    uint256 public immutable settlementTime;
 
-    uint256 public collateralAmount;
+    uint256 public immutable collateralAmount;
     uint256 public partyACollateral;
     uint256 public partyBCollateral;
 
-    bool public isPartyALong;
+    bool public immutable isPartyALong;
     bool public counterpartyAgreed;
     bool public contractSettled;
     bool public partyACancel;

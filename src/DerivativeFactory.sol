@@ -48,12 +48,12 @@ contract DerivativeFactory is Ownable {
     event DerivativeCreated(address derivativeContract, address partyA);
     event UpkeepRegistered(uint256 upkeepID, address derivativeContract);
 
-    address public link;
-    address public registrar;
+    address public immutable i_link;
+    address public immutable i_registrar;
 
     constructor(address _link, address _registrar) {
-        link = _link;
-        registrar = _registrar;
+        i_link = _link;
+        i_registrar = _registrar;
     }
 
     function createCustomDerivative(
@@ -94,8 +94,8 @@ contract DerivativeFactory is Ownable {
             amount: 1000000000000000000
         });
 
-        LinkTokenInterface(link).approve(registrar, params.amount);
-        uint256 upkeepID = AutomationRegistrarInterface(registrar).registerUpkeep(params);
+        LinkTokenInterface(i_link).approve(i_registrar, params.amount);
+        uint256 upkeepID = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
         if (upkeepID != 0) {
             emit UpkeepRegistered(upkeepID, _deployedContract);
         } else {
@@ -104,9 +104,9 @@ contract DerivativeFactory is Ownable {
     }
 
     function withdrawLink() public onlyOwner {
-        uint256 balance = LinkTokenInterface(link).balanceOf(address(this));
+        uint256 balance = LinkTokenInterface(i_link).balanceOf(address(this));
         if (balance == 0) revert DerivativeFactory__NoLinkToWithdraw();
 
-        if (!LinkTokenInterface(link).transfer(msg.sender, balance)) revert DerivativeFactory__LinkTransferFailed();
+        if (!LinkTokenInterface(i_link).transfer(msg.sender, balance)) revert DerivativeFactory__LinkTransferFailed();
     }
 }

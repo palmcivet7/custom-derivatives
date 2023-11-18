@@ -14,14 +14,14 @@ contract FactorySender is Ownable {
     error FactorySender__LinkTransferFailed();
     error FactorySender__TransferFailed();
 
-    address public link;
-    address public router;
-    address public priceFeed;
+    address public immutable i_link;
+    address public immutable i_router;
+    address public immutable i_priceFeed;
 
     constructor(address _link, address _router, address _priceFeed) {
-        link = _link;
-        router = _router;
-        priceFeed = _priceFeed;
+        i_link = _link;
+        i_router = _router;
+        i_priceFeed = _priceFeed;
     }
 
     function createCrossChainCustomDerivative(
@@ -50,16 +50,16 @@ contract FactorySender is Ownable {
             data: abi.encode(_priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong),
             tokenAmounts: new Client.EVMTokenAmount[](0),
             extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 4000000, strict: false})),
-            feeToken: link
+            feeToken: i_link
         });
 
-        uint256 fees = IRouterClient(router).getFee(_destinationChainSelector, message);
-        LinkTokenInterface(link).approve(address(router), fees);
-        IRouterClient(router).ccipSend(_destinationChainSelector, message);
+        uint256 fees = IRouterClient(i_router).getFee(_destinationChainSelector, message);
+        LinkTokenInterface(i_link).approve(address(i_router), fees);
+        IRouterClient(i_router).ccipSend(_destinationChainSelector, message);
     }
 
     function getLatestPrice() public view returns (uint256) {
-        (, int256 price,,,) = AggregatorV3Interface(priceFeed).latestRoundData();
+        (, int256 price,,,) = AggregatorV3Interface(i_priceFeed).latestRoundData();
         return uint256(price);
     }
 
@@ -72,9 +72,9 @@ contract FactorySender is Ownable {
     }
 
     function withdrawLink() public onlyOwner {
-        uint256 balance = LinkTokenInterface(link).balanceOf(address(this));
+        uint256 balance = LinkTokenInterface(i_link).balanceOf(address(this));
         if (balance == 0) revert FactorySender__NoLinkToWithdraw();
 
-        if (!LinkTokenInterface(link).transfer(msg.sender, balance)) revert FactorySender__LinkTransferFailed();
+        if (!LinkTokenInterface(i_link).transfer(msg.sender, balance)) revert FactorySender__LinkTransferFailed();
     }
 }
