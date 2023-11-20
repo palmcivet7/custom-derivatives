@@ -1,11 +1,7 @@
 import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 import DeploySection from "@/components/DeploySection";
-import DeployedContracts from "@/components/DeployedContracts";
-
-const inter = Inter({ subsets: ["latin"] });
+import DeployedContractsEthSep from "@/components/DeployedContractsEthSep";
 
 export default function Home() {
   return (
@@ -22,7 +18,7 @@ export default function Home() {
       <main className={styles.main}>
         <div className={styles.description}>
           <DeploySection />
-          <DeployedContracts />
+          <DeployedContractsEthSep />
         </div>
       </main>
     </>

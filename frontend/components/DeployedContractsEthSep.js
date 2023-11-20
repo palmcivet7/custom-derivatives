@@ -11,7 +11,7 @@ import {
   ERC20_ABI,
 } from "../utils/constants";
 
-const DeployedContracts = () => {
+const DeployedContractsEthSep = () => {
   const [deployedContracts, setDeployedContracts] = useState([]);
   const [connectedWallet, setConnectedWallet] = useState("");
 
@@ -196,7 +196,7 @@ const DeployedContracts = () => {
 
   return (
     <div>
-      <h2>Deployed Contracts</h2>
+      <h2>Deployed Contracts on Ethereum Sepolia</h2>
       {deployedContracts.length > 0 ? (
         <ul className={styles.deployedContractsList}>
           {deployedContracts.map((contract, index) => (
@@ -284,4 +284,4 @@ const DeployedContracts = () => {
   );
 };
 
-export default DeployedContracts;
+export default DeployedContractsEthSep;

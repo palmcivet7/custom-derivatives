@@ -207,7 +207,7 @@ const DeploySection = () => {
             <div className={styles.formElement}>
               <select name="chain" onChange={handleInputChange}>
                 <option value="">Select Chain</option>
-                <option value="chainA">Arbitrum Goerli</option>
+                <option value="chainA">Arbitrum Sepolia</option>
                 <option value="chainB">Ethereum Sepolia</option>
                 {/* Add more chains as needed */}
               </select>
