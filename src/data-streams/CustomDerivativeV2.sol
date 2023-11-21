@@ -3,8 +3,9 @@
 pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+// import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {AutomationCompatible} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
+import {ILogAutomation} from "@chainlink/contracts/src/v0.8/automation/interfaces/ILogAutomation.sol";
 
 /**
  * @title CustomDerivativeV2
@@ -61,13 +62,24 @@ contract CustomDerivativeV2 is AutomationCompatible {
     event CollateralWithdrawn(address withdrawer, uint256 amount);
     event PartyRequestedCancellation(address party);
 
+    struct BasicReport {
+        bytes32 feedId; // The feed ID the report has data for
+        uint32 validFromTimestamp; // Earliest timestamp for which price is applicable
+        uint32 observationsTimestamp; // Latest timestamp for which price is applicable
+        uint192 nativeFee; // Base cost to validate a transaction using the report, denominated in the chain’s native token (WETH/ETH)
+        uint192 linkFee; // Base cost to validate a transaction using the report, denominated in LINK
+        uint32 expiresAt; // Latest timestamp where the report can be verified on-chain
+        int192 price; // DON consensus median price, carried to 8 decimal places
+    }
+
     address payable public immutable partyA;
     address payable public partyB;
     // a 2% fee will be taken from successful trades and sent to the DEVELOPER wallet
     address private constant DEVELOPER = 0xe0141DaBb4A8017330851f99ff8fc34aa619BBFD;
     uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
-    AggregatorV3Interface public immutable priceFeed;
+    // AggregatorV3Interface public immutable priceFeed;
+    IVerifierProxy public verifier;
     IERC20 public immutable collateralToken;
     uint256 public immutable strikePrice;
     uint256 public immutable settlementTime;
