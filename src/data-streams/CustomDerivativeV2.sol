@@ -236,7 +236,7 @@ contract CustomDerivativeV2 is AutomationCompatible {
      * @notice This function uses Chainlink Automation to call the settleContract() function
      * when checkUpkeep() returns true.
      */
-    function performUpkeep(bytes calldata /* performData */ ) external {
+    function performUpkeep(bytes calldata /* performData */ ) external notSettledOrCancelled {
         settleContract();
     }
 
