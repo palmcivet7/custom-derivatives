@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import {Script} from "forge-std/Script.sol";
-import {FactoryReceiver} from "../src/FactoryReceiver.sol";
+import {FactoryReceiver} from "../../src/v1-data-feeds/FactoryReceiver.sol";
 import {HelperReceiverConfig} from "./HelperReceiverConfig.s.sol";
 
 contract DeployReceiverConfig is Script {

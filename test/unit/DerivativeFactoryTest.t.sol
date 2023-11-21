@@ -3,14 +3,14 @@
 pragma solidity ^0.8.19;
 
 import {Test, console} from "forge-std/Test.sol";
-import {DeployDerivativeFactory} from "../../script/DeployDerivativeFactory.s.sol";
-import {DerivativeFactory} from "../../src/DerivativeFactory.sol";
-import {CustomDerivative} from "../../src/CustomDerivative.sol";
+import {DeployDerivativeFactory} from "../../script/v1-data-feeds/DeployDerivativeFactory.s.sol";
+import {DerivativeFactory} from "../../src/v1-data-feeds/DerivativeFactory.sol";
+import {CustomDerivative} from "../../src/v1-data-feeds/CustomDerivative.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 import {MockUSDC} from "../mocks/MockUSDC.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-import {HelperReceiverConfig} from "../../script/HelperReceiverConfig.s.sol";
+import {HelperReceiverConfig} from "../../script/v1-data-feeds/HelperReceiverConfig.s.sol";
 import {MockLinkToken} from "@chainlink/contracts/src/v0.8/mocks/MockLinkToken.sol";
 
 contract DerivativeFactoryTest is Test {

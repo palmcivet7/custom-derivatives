@@ -6,6 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {AutomationCompatible} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import {ILogAutomation} from "@chainlink/contracts/src/v0.8/automation/interfaces/ILogAutomation.sol";
+import {IVerifierProxy} from "../interfaces/IVerifierProxy.sol";
 
 /**
  * @title CustomDerivativeV2
@@ -25,10 +26,6 @@ interface StreamsLookupCompatibleInterface {
         external
         view
         returns (bool upkeepNeeded, bytes memory performData);
-}
-
-interface IVerifierProxy {
-    function verify(bytes memory signedReport) external payable returns (bytes memory verifierResponse);
 }
 
 interface IReportHandler {
@@ -79,7 +76,7 @@ contract CustomDerivativeV2 is AutomationCompatible {
     uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
     // AggregatorV3Interface public immutable priceFeed;
-    IVerifierProxy public verifier;
+    IVerifierProxy public immutable verifier;
     IERC20 public immutable collateralToken;
     uint256 public immutable strikePrice;
     uint256 public immutable settlementTime;
@@ -97,7 +94,8 @@ contract CustomDerivativeV2 is AutomationCompatible {
 
     /**
      * @param _partyA The address of user who deployed the custom contract via the DerivativeFactory
-     * @param _priceFeed The Chainlink PriceFeed address of the underlying asset
+     * //  * @param _priceFeed The Chainlink PriceFeed address of the underlying asset
+     * @param _verifier The Chainlink Data Streams Verifier Proxy address
      * @param _strikePrice The strike price is what the final price is compared against to determine the payout receipient
      * @param _settlementTime The settlement time at which the strike price is compared to the underlying asset price
      * @param _collateralToken The address of the ERC20 token used for collateral
@@ -108,7 +106,8 @@ contract CustomDerivativeV2 is AutomationCompatible {
      */
     constructor(
         address payable _partyA,
-        address _priceFeed,
+        // address _priceFeed,
+        address _verifier,
         uint256 _strikePrice,
         uint256 _settlementTime,
         address _collateralToken,
@@ -116,13 +115,15 @@ contract CustomDerivativeV2 is AutomationCompatible {
         bool _isPartyALong
     ) {
         if (_partyA == address(0)) revert CustomDerivative__InvalidAddress();
-        if (_priceFeed == address(0)) revert CustomDerivative__InvalidAddress();
+        // if (_priceFeed == address(0)) revert CustomDerivative__InvalidAddress();
+        if (_verifier == address(0)) revert CustomDerivative__InvalidAddress();
         if (_strikePrice == 0) revert CustomDerivative__NeedsToBeMoreThanZero();
         if (_settlementTime < block.timestamp) revert CustomDerivative__SettlementTimeNeedsToBeInFuture();
         if (_collateralToken == address(0)) revert CustomDerivative__InvalidAddress();
         if (_collateralAmount == 0) revert CustomDerivative__NeedsToBeMoreThanZero();
         partyA = _partyA;
-        priceFeed = AggregatorV3Interface(_priceFeed);
+        // priceFeed = AggregatorV3Interface(_priceFeed);
+        verifier = IVerifierProxy(_verifier);
         strikePrice = _strikePrice;
         settlementTime = _settlementTime;
         collateralToken = IERC20(_collateralToken);
@@ -252,7 +253,7 @@ contract CustomDerivativeV2 is AutomationCompatible {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
         if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
 
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        // (, int256 price,,,) = priceFeed.latestRoundData();
         uint256 finalPrice = uint256(price);
         contractSettled = true;
         uint256 totalCollateral = partyACollateral + partyBCollateral;
