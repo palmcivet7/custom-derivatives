@@ -193,6 +193,7 @@ contract CustomDerivative is AutomationCompatible {
         external
         view
         cannotExecute
+        notSettledOrCancelled
         returns (bool upkeepNeeded, bytes memory /* performData */ )
     {
         upkeepNeeded = (block.timestamp >= settlementTime);
