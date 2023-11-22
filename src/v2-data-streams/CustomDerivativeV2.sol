@@ -79,7 +79,6 @@ contract CustomDerivativeV2 is AutomationCompatible {
     address private constant DEVELOPER = 0xe0141DaBb4A8017330851f99ff8fc34aa619BBFD;
     uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
-    address public link;
     IVerifierProxy public immutable verifier;
     IERC20 public immutable collateralToken;
     uint256 public immutable strikePrice;
