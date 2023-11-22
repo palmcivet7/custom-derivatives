@@ -91,7 +91,7 @@ contract DerivativeFactory is Ownable {
             checkData: hex"",
             triggerConfig: hex"",
             offchainConfig: hex"",
-            amount: 1000000000000000000
+            amount: 3000000000000000000
         });
 
         LinkTokenInterface(i_link).approve(i_registrar, params.amount);
