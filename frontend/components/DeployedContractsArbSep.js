@@ -41,8 +41,9 @@ const DeployedContractsArbSep = () => {
     );
 
     try {
-      const feedIdsArray = await contract.feedIds();
-      const underlyingAsset = formatAssetArray(feedIdsArray[0]);
+      const underlyingAsset = "ETH";
+      // const feedIdsArray = await contract.feedIds();
+      // const underlyingAsset = formatAssetArray(feedIdsArray[0]);
       const strikePrice = await contract.strikePrice();
       const settlementTime = new Date((await contract.settlementTime()) * 1000);
       const collateralAsset = await contract.collateralToken();
