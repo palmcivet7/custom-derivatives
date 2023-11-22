@@ -28,7 +28,11 @@ interface IVerifierProxy {
         payable
         returns (bytes[] memory verifiedReports);
 
-    // The feed ID is the first 32 bytes of the report data.
+    //The feed ID is the first 32 bytes of the report data.
+
+    function s_feeManager() external view returns (IVerifierFeeManager);
 
     receive() external payable;
 }
+
+interface IVerifierFeeManager {}

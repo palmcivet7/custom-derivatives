@@ -69,12 +69,9 @@ contract DerivativeFactoryV2 is Ownable {
         uint256 settlementTime,
         address collateralToken,
         uint256 collateralAmount,
-        bool isPartyALong
-    )
-        // string[] memory feedIds
-        public
-        returns (address)
-    {
+        bool isPartyALong,
+        string[] memory feedIds
+    ) public returns (address) {
         CustomDerivativeV2 newCustomDerivative = new CustomDerivativeV2(
             partyA,
             verifier,
@@ -83,8 +80,7 @@ contract DerivativeFactoryV2 is Ownable {
             collateralToken,
             collateralAmount,
             isPartyALong,
-            // feedIds,
-            i_link
+            feedIds
         );
 
         emit DerivativeCreated(address(newCustomDerivative), partyA);

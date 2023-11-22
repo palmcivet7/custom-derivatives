@@ -6,7 +6,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AutomationCompatible} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import {ILogAutomation} from "@chainlink/contracts/src/v0.8/automation/interfaces/ILogAutomation.sol";
 import {IVerifierProxy} from "../interfaces/IVerifierProxy.sol";
-import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
+import {IFeeManager} from "../interfaces/IFeeManager.sol";
+import {ChainlinkCommon} from "../libraries/ChainlinkCommon.sol";
 
 /**
  * @title CustomDerivativeV2
@@ -32,7 +33,10 @@ interface IReportHandler {
     function handleReport(bytes calldata report) external;
 }
 
+interface IRewardManager {}
+
 contract CustomDerivativeV2 is AutomationCompatible {
+    error StreamsLookup(string feedParamKey, string[] feeds, string timeParamKey, uint256 time, bytes extraData);
     error CustomDerivative__InvalidAddress();
     error CustomDerivative__NeedsToBeMoreThanZero();
     error CustomDerivative__SettlementTimeNeedsToBeInFuture();
@@ -75,9 +79,8 @@ contract CustomDerivativeV2 is AutomationCompatible {
     address private constant DEVELOPER = 0xe0141DaBb4A8017330851f99ff8fc34aa619BBFD;
     uint256 public constant DEVELOPER_FEE_PERCENTAGE = 2; // 2%
 
+    address public link;
     IVerifierProxy public immutable verifier;
-    LinkTokenInterface public immutable link;
-
     IERC20 public immutable collateralToken;
     uint256 public immutable strikePrice;
     uint256 public immutable settlementTime;
@@ -95,7 +98,7 @@ contract CustomDerivativeV2 is AutomationCompatible {
 
     string public constant STRING_DATASTREAMS_FEEDLABEL = "feedIDs";
     string public constant STRING_DATASTREAMS_QUERYLABEL = "timestamp";
-    // string[] public immutable feedIds;
+    string[] public feedIds;
 
     /**
      * @param _partyA The address of user who deployed the custom contract via the DerivativeFactory
@@ -106,7 +109,6 @@ contract CustomDerivativeV2 is AutomationCompatible {
      * @param _collateralAmount The amount of the collateral asset to be deposited by both parties
      * @param _isPartyALong The position of the deploying user (partyA) - if true they are long, if false they are short
      * param _feedIds The Chainlink Data Streams ID(s)
-     * @param _link The Chainlink Token used for paying Data Streams fees
      * @notice These constructor parameters are intended to be set when the createCustomDerivative()
      * in the DerivativeFactory contract is called.
      */
@@ -118,8 +120,7 @@ contract CustomDerivativeV2 is AutomationCompatible {
         address _collateralToken,
         uint256 _collateralAmount,
         bool _isPartyALong,
-        // string[] memory _feedIds,
-        address _link
+        string[] memory _feedIds
     ) {
         if (_partyA == address(0)) revert CustomDerivative__InvalidAddress();
         if (_verifier == address(0)) revert CustomDerivative__InvalidAddress();
@@ -136,8 +137,7 @@ contract CustomDerivativeV2 is AutomationCompatible {
         isPartyALong = _isPartyALong;
         counterpartyAgreed = false;
         contractSettled = false;
-        // feedIds = _feedIds;
-        link = LinkTokenInterface(_link);
+        feedIds = _feedIds;
     }
 
     //////////////////////////////
@@ -234,15 +234,18 @@ contract CustomDerivativeV2 is AutomationCompatible {
         view
         cannotExecute
         notSettledOrCancelled
-        returns (bool upkeepNeeded, bytes memory /* performData */ )
+        returns (bool, bytes memory /* performData */ )
     {
-        upkeepNeeded = (block.timestamp >= settlementTime);
-        return (upkeepNeeded, bytes(""));
+        if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
+        if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
+        revert StreamsLookup(STRING_DATASTREAMS_FEEDLABEL, feedIds, STRING_DATASTREAMS_QUERYLABEL, settlementTime, "");
     }
 
     function checkCallback(bytes[] calldata values, bytes calldata extraData)
         external
-        pure
+        view
+        cannotExecute
+        notSettledOrCancelled
         returns (bool, bytes memory)
     {
         return (true, abi.encode(values, extraData));
@@ -253,7 +256,23 @@ contract CustomDerivativeV2 is AutomationCompatible {
      * when checkUpkeep() returns true.
      */
     function performUpkeep(bytes calldata performData) external notSettledOrCancelled {
-        // settleContract();
+        (bytes[] memory signedReports,) = abi.decode(performData, (bytes[], bytes));
+
+        bytes memory report = signedReports[0];
+
+        (, bytes memory reportData) = abi.decode(report, (bytes32[3], bytes));
+
+        IFeeManager feeManager = IFeeManager(address(verifier.s_feeManager()));
+        IRewardManager rewardManager = IRewardManager(address(feeManager.i_rewardManager()));
+        address feeTokenAddress = feeManager.i_linkAddress();
+        (ChainlinkCommon.Asset memory fee,,) = feeManager.getFeeAndReward(address(this), reportData, feeTokenAddress);
+        IERC20(feeTokenAddress).approve(address(rewardManager), fee.amount);
+
+        bytes memory verifiedReportData = verifier.verify(report, abi.encode(feeTokenAddress));
+
+        BasicReport memory verifiedReport = abi.decode(verifiedReportData, (BasicReport));
+
+        settleContract(verifiedReport.price);
     }
 
     /**
@@ -264,30 +283,30 @@ contract CustomDerivativeV2 is AutomationCompatible {
      * @notice A 2% fee is taken from the total collateral and sent to the developer address
      * for every successful derivative settlement.
      */
-    // function settleContract() public notSettledOrCancelled {
-    //     if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
-    //     if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
+    function settleContract(int192 price) private notSettledOrCancelled {
+        if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
+        if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
 
-    //     // (, int256 price,,,) = priceFeed.latestRoundData();
-    //     uint256 finalPrice = uint256(price);
-    //     contractSettled = true;
-    //     uint256 totalCollateral = partyACollateral + partyBCollateral;
-    //     address winner;
-    //     if (
-    //         (isPartyALong && finalPrice >= uint256(strikePrice)) || (!isPartyALong && finalPrice < uint256(strikePrice))
-    //     ) {
-    //         winner = partyA;
-    //     } else {
-    //         winner = partyB;
-    //     }
+        // (, int256 price,,,) = priceFeed.latestRoundData();
+        uint256 finalPrice = uint256(int256(price));
+        contractSettled = true;
+        uint256 totalCollateral = partyACollateral + partyBCollateral;
+        address winner;
+        if (
+            (isPartyALong && finalPrice >= uint256(strikePrice)) || (!isPartyALong && finalPrice < uint256(strikePrice))
+        ) {
+            winner = partyA;
+        } else {
+            winner = partyB;
+        }
 
-    //     uint256 developerFee = (totalCollateral * DEVELOPER_FEE_PERCENTAGE) / 100;
-    //     uint256 winnerAmount = totalCollateral - developerFee;
-    //     if (!collateralToken.transfer(DEVELOPER, developerFee)) revert CustomDerivative__TransferFailed();
-    //     if (!collateralToken.transfer(winner, winnerAmount)) revert CustomDerivative__TransferFailed();
+        uint256 developerFee = (totalCollateral * DEVELOPER_FEE_PERCENTAGE) / 100;
+        uint256 winnerAmount = totalCollateral - developerFee;
+        if (!collateralToken.transfer(DEVELOPER, developerFee)) revert CustomDerivative__TransferFailed();
+        if (!collateralToken.transfer(winner, winnerAmount)) revert CustomDerivative__TransferFailed();
 
-    //     emit ContractSettled(finalPrice);
-    // }
+        emit ContractSettled(finalPrice);
+    }
 
     ////////////////////////////////////
     ///////// Cancel Contract /////////

@@ -43,3 +43,13 @@ Explicit features - passing msg.sender and payable $5 avax
 [CCIP TX](https://ccip.chain.link/msg/0x96d44c16f1f95fdcb93f0e6f8b250cb73bf0dc345be3da5d690615f532587478)
 
 [Receiver on Sepolia](https://sepolia.etherscan.io/address/0xd1cf09fe17359b730cd5a1fcf52e36b4ed5b4a29)
+
+---
+
+[Mock USDC Arb Sepo](https://sepolia.arbiscan.io/address/0xbd3f8ec76e5829a4a35ce369a19c7b53bcb14d98#writeContract)
+
+arbitrum sepolia data streams
+
+["0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b"] eth/usd stream id
+
+[Derivative Factory Arb Sep](https://sepolia.arbiscan.io/address/0x403a021e8eeb066cc7ffc1a9ab0be4ee8f703880#internaltx)
