@@ -2,6 +2,7 @@ import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import DeploySection from "@/components/DeploySection";
 import DeployedContractsEthSep from "@/components/DeployedContractsEthSep";
+import DeployedContractsArbSep from "@/components/DeployedContractsArbSep";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
         <div className={styles.description}>
           <DeploySection />
           <DeployedContractsEthSep />
+          <DeployedContractsArbSep />
         </div>
       </main>
     </>
