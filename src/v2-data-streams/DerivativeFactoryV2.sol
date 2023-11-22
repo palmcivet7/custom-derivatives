@@ -16,7 +16,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  *
  * This is the factory contract that allows users to deploy their own versions of our CustomDerivative contract.
  * When a user deploys their CustomDerivative contract they will specify the following parameters:
- *  - underlying asset
+ *  - underlying asset - this is determined by the verifier address and feedIds
  *  - strike price (the final price being above or below this will determine the party receiving the payout)
  *  - settlement time (the time the underlying asset's price will be compared to the strike price)
  *  - collateral asset (ERC20 token, USDC is recommended for demonstration purposes)
@@ -39,27 +39,20 @@ struct RegistrationParams {
     uint96 amount;
 }
 
-struct LogTriggerConfig {
-    address contractAddress; // must have address that will be emitting the log
-    uint8 filterSelector; // must have filtserSelector, denoting  which topics apply to filter ex 000, 101, 111...only last 3 bits apply
-    bytes32 topic0; // must have signature of the emitted event
-    bytes32 topic1; // optional filter on indexed topic 1
-    bytes32 topic2; // optional filter on indexed topic 2
-    bytes32 topic3; // optional filter on indexed topic 3
-}
-
 interface AutomationRegistrarInterface {
     function registerUpkeep(RegistrationParams calldata requestParams) external returns (uint256);
 }
 
-contract DerivativeFactory is Ownable {
+contract DerivativeFactoryV2 is Ownable {
     error DerivativeFactory__NoLinkToWithdraw();
     error DerivativeFactory__LinkTransferFailed();
     error DerivativeFactory__LinkTransferAndCallFailed();
-    error DerivativeFactory__AutomationRegistrationFailed();
+    error DerivativeFactory__CustomLogicRegistrationFailed();
+    error DerivativeFactory__LogTriggerRegistrationFailed();
 
     event DerivativeCreated(address derivativeContract, address partyA);
-    event UpkeepRegistered(uint256 upkeepID, address derivativeContract);
+    event CustomLogicUpkeepRegistered(uint256 upkeepID, address derivativeContract);
+    event LogTriggerUpkeepRegistered(uint256 upkeepID, address derivativeContract);
 
     address public immutable i_link;
     address public immutable i_registrar;
@@ -71,27 +64,35 @@ contract DerivativeFactory is Ownable {
 
     function createCustomDerivative(
         address payable partyA,
-        // address priceFeed, // underlying asset
-        address verifier,
+        address payable verifier,
         uint256 strikePrice,
         uint256 settlementTime,
         address collateralToken,
         uint256 collateralAmount,
         bool isPartyALong
-    ) public returns (address) {
+    )
+        // string[] memory feedIds
+        public
+        returns (address)
+    {
         CustomDerivativeV2 newCustomDerivative = new CustomDerivativeV2(
             partyA,
-            // priceFeed,
             verifier,
             strikePrice,
             settlementTime,
             collateralToken,
             collateralAmount,
-            isPartyALong
+            isPartyALong,
+            // feedIds,
+            i_link
         );
 
         emit DerivativeCreated(address(newCustomDerivative), partyA);
         registerAndPredictID(address(newCustomDerivative));
+        registerAndPredictIDLogTrigger(address(newCustomDerivative));
+        if (!LinkTokenInterface(i_link).transfer(address(newCustomDerivative), 2000000000000000000)) {
+            revert DerivativeFactory__LinkTransferFailed();
+        }
         return address(newCustomDerivative);
     }
 
@@ -102,7 +103,7 @@ contract DerivativeFactory is Ownable {
             upkeepContract: _deployedContract,
             gasLimit: 2000000,
             adminAddress: owner(),
-            triggerType: 1, // 	0 is Conditional upkeep, 1 is Log trigger upkeep
+            triggerType: 0, // 	0 is Conditional upkeep, 1 is Log trigger upkeep
             checkData: hex"",
             triggerConfig: hex"",
             offchainConfig: hex"",
@@ -112,9 +113,34 @@ contract DerivativeFactory is Ownable {
         LinkTokenInterface(i_link).approve(i_registrar, params.amount);
         uint256 upkeepID = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
         if (upkeepID != 0) {
-            emit UpkeepRegistered(upkeepID, _deployedContract);
+            emit CustomLogicUpkeepRegistered(upkeepID, _deployedContract);
         } else {
-            revert DerivativeFactory__AutomationRegistrationFailed();
+            revert DerivativeFactory__CustomLogicRegistrationFailed();
+        }
+    }
+
+    function registerAndPredictIDLogTrigger(address _deployedContract) private {
+        bytes32 eventHash = keccak256(abi.encodePacked("SettlementTimeReached(uint256)"));
+
+        RegistrationParams memory params = RegistrationParams({
+            name: "",
+            encryptedEmail: hex"",
+            upkeepContract: _deployedContract,
+            gasLimit: 2000000,
+            adminAddress: owner(),
+            triggerType: 1, // 	0 is Conditional upkeep, 1 is Log trigger upkeep
+            checkData: hex"",
+            triggerConfig: abi.encode(_deployedContract, 0, eventHash, 0x0, 0x0, 0x0),
+            offchainConfig: hex"",
+            amount: 1000000000000000000
+        });
+
+        LinkTokenInterface(i_link).approve(i_registrar, params.amount);
+        uint256 upkeepID = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
+        if (upkeepID != 0) {
+            emit LogTriggerUpkeepRegistered(upkeepID, _deployedContract);
+        } else {
+            revert DerivativeFactory__LogTriggerRegistrationFailed();
         }
     }
 
