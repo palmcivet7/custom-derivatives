@@ -3,11 +3,11 @@ import axios from "axios";
 import { ethers } from "ethers";
 import styles from "../styles/DeployedContracts.module.css";
 import {
-  SEPOLIA_FACTORY_RECEIVER_ADDRESS,
-  ETHERSCAN_API_KEY,
-  ETHERSCAN_API_URL,
-  CUSTOM_DERIVATIVE_ABI,
-  SEPOLIA_RPC_URL,
+  ARBITRUM_SEPOLIA_FACTORY_ADDRESS,
+  ARBISCAN_API_KEY,
+  ARBISCAN_API_URL,
+  DATA_STREAMS_CUSTOM_DERIVATIVE_ABI,
+  ARBITRUM_SEPOLIA_RPC_URL,
   ERC20_ABI,
 } from "../utils/constants";
 
@@ -31,15 +31,17 @@ const DeployedContractsArbSep = () => {
   }, []);
 
   const fetchContractDetails = async (contractAddress) => {
-    const provider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
+    const provider = new ethers.providers.JsonRpcProvider(
+      ARBITRUM_SEPOLIA_RPC_URL
+    );
     const contract = new ethers.Contract(
       contractAddress,
-      CUSTOM_DERIVATIVE_ABI,
+      DATA_STREAMS_CUSTOM_DERIVATIVE_ABI,
       provider
     );
 
     try {
-      const underlyingAsset = await contract.priceFeed();
+      const underlyingAsset = await contract.feedIds();
       const strikePrice = await contract.strikePrice();
       const settlementTime = new Date((await contract.settlementTime()) * 1000);
       const collateralAsset = await contract.collateralToken();
@@ -54,7 +56,7 @@ const DeployedContractsArbSep = () => {
 
       return {
         address: contractAddress,
-        chain: "Ethereum Sepolia",
+        chain: "Arbitrum Sepolia",
         underlyingAsset,
         strikePrice: ethers.utils.formatUnits(strikePrice, 18),
         settlementTime: settlementTime.toLocaleString(),
@@ -76,22 +78,22 @@ const DeployedContractsArbSep = () => {
 
   const fetchDeployedContracts = async () => {
     try {
-      const response = await axios.get(`${ETHERSCAN_API_URL}`, {
+      const response = await axios.get(`${ARBISCAN_API_URL}`, {
         params: {
           module: "account",
           action: "txlistinternal",
-          address: SEPOLIA_FACTORY_RECEIVER_ADDRESS,
+          address: ARBITRUM_SEPOLIA_FACTORY_ADDRESS,
           startblock: 0,
           endblock: 99999999,
           sort: "asc",
-          apikey: ETHERSCAN_API_KEY,
+          apikey: ARBISCAN_API_KEY,
         },
       });
 
       const filteredContracts = response.data.result.filter(
         (tx) =>
           tx.from.toLowerCase() ===
-            SEPOLIA_FACTORY_RECEIVER_ADDRESS.toLowerCase() &&
+            ARBITRUM_SEPOLIA_FACTORY_ADDRESS.toLowerCase() &&
           tx.type === "create" &&
           tx.contractAddress
       );
@@ -111,9 +113,11 @@ const DeployedContractsArbSep = () => {
 
   const formatAsset = (assetAddress) => {
     switch (assetAddress) {
-      case "0x694AA1769357215DE4FAC081bf1f309aDC325306":
+      case [
+        "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b",
+      ]:
         return "ETH";
-      case "0x679dc61439EE95b27ac931a4e8b0943F25Ad0f54":
+      case "0xbd3f8ec76e5829a4a35ce369a19c7b53bcb14d98":
         return "USDC";
       default:
         return assetAddress;
@@ -130,7 +134,7 @@ const DeployedContractsArbSep = () => {
     const signer = provider.getSigner();
     const contractInstance = new ethers.Contract(
       contract.address,
-      CUSTOM_DERIVATIVE_ABI,
+      DATA_STREAMS_CUSTOM_DERIVATIVE_ABI,
       signer
     );
 
@@ -203,7 +207,7 @@ const DeployedContractsArbSep = () => {
             <li key={index} className={styles.deployedContractItem}>
               <p>
                 <a
-                  href={`https://sepolia.etherscan.io/address/${contract.address}`}
+                  href={`https://sepolia.arbiscan.io/address/${contract.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -266,7 +270,7 @@ const DeployedContractsArbSep = () => {
               {contract.txHash && (
                 <div>
                   <a
-                    href={`https://sepolia.etherscan.io/tx/${contract.txHash}`}
+                    href={`https://sepolia.arbiscan.io/tx/${contract.txHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

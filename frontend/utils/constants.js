@@ -1816,3 +1816,7 @@ export const ARBITRUM_SEPOLIA_FACTORY_ABI = [
     type: "function",
   },
 ];
+
+export const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
+
+export const ARBISCAN_API_KEY = "WPI7ZZS12BKQ7DGIZ51D8T9T79ANN57QY8";
