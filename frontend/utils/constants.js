@@ -1013,7 +1013,7 @@ export const ARBITRUM_SEPOLIA_RPC_URL =
   "https://sepolia-rollup.arbitrum.io/rpc";
 
 export const ARBITRUM_SEPOLIA_MOCK_USDC_TOKEN_ADDRESS =
-  "0x403a021e8eeb066cc7ffc1a9ab0be4ee8f703880";
+  "0xbd3f8ec76e5829a4a35ce369a19c7b53bcb14d98";
 
 export const DATA_STREAMS_CUSTOM_DERIVATIVE_ABI = [
   {
@@ -1820,3 +1820,10 @@ export const ARBITRUM_SEPOLIA_FACTORY_ABI = [
 export const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
 
 export const ARBISCAN_API_KEY = "WPI7ZZS12BKQ7DGIZ51D8T9T79ANN57QY8";
+
+export const ARBITRUM_SEPOLIA_ETH_USD_FEED_ID = [
+  "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b",
+];
+
+export const ARBITRUM_SEPOLIA_VERIFIER_ADDRESS =
+  "0x2ff010DEbC1297f19579B4246cad07bd24F2488A";

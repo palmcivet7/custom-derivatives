@@ -11,6 +11,11 @@ import {
   SEPOLIA_ETH_PRICE_FEED_ADDRESS,
   SEPOLIA_MOCK_USDC_TOKEN_ADDRESS,
   FUJI_AVAX_PRICE_FEED_ADDRESS,
+  ARBITRUM_SEPOLIA_ETH_USD_FEED_ID,
+  ARBITRUM_SEPOLIA_FACTORY_ADDRESS,
+  ARBITRUM_SEPOLIA_FACTORY_ABI,
+  ARBITRUM_SEPOLIA_MOCK_USDC_TOKEN_ADDRESS,
+  ARBITRUM_SEPOLIA_VERIFIER_ADDRESS,
 } from "../utils/constants";
 
 const DeploySection = () => {
@@ -25,6 +30,7 @@ const DeploySection = () => {
     collateralAsset: "",
     collateralAmount: "",
     position: "", // 'long' or 'short'
+    feedId: "",
   });
   const [isDateTimeInputActive, setIsDateTimeInputActive] = useState(false);
   const [settlementTime, setSettlementTime] = useState("");
@@ -45,7 +51,19 @@ const DeploySection = () => {
   };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.name === "underlyingAsset" && formData.chain === "chainA") {
+      // Automatically set feedId for Arbitrum Sepolia if ETH is selected
+      const newFeedId =
+        e.target.value === "asset1" ? ARBITRUM_SEPOLIA_ETH_USD_FEED_ID : "";
+      setFormData({
+        ...formData,
+        [e.target.name]: e.target.value,
+        feedId: newFeedId,
+      });
+    } else {
+      // Handle other input changes normally
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handlePositionChange = (position) => {
@@ -84,17 +102,32 @@ const DeploySection = () => {
     let collateralTokenAddress;
     let isPartyALong;
 
+    const testFeedIds = [
+      "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b",
+    ];
+    // Use testFeedIds in the contract function call
+
     // Set the receiver address and destination chain selector
     if (formData.chain === "chainB") {
       // Ethereum Sepolia
       receiverAddress = SEPOLIA_FACTORY_RECEIVER_ADDRESS;
       destinationChainSelector = SEPOLIA_DESTINATION_CHAIN_SELECTOR;
-    }
-
-    // Set the price feed address
-    if (formData.chain === "chainB" && formData.underlyingAsset === "asset1") {
-      // ETH
-      priceFeedAddress = SEPOLIA_ETH_PRICE_FEED_ADDRESS;
+      priceFeedAddress =
+        formData.underlyingAsset === "asset1"
+          ? SEPOLIA_ETH_PRICE_FEED_ADDRESS
+          : "";
+      collateralTokenAddress =
+        formData.collateralAsset === "collateral1"
+          ? SEPOLIA_MOCK_USDC_TOKEN_ADDRESS
+          : "";
+    } else if (formData.chain === "chainA") {
+      // Arbitrum Sepolia
+      receiverAddress = ARBITRUM_SEPOLIA_FACTORY_ADDRESS;
+      destinationChainSelector = ""; // Set your destination chain selector for Arbitrum Sepolia
+      collateralTokenAddress =
+        formData.collateralAsset === "collateral1"
+          ? ARBITRUM_SEPOLIA_MOCK_USDC_TOKEN_ADDRESS
+          : "";
     }
 
     // Convert strike price and collateral amount to Wei
@@ -109,55 +142,100 @@ const DeploySection = () => {
     const settlementTimeUnix =
       new Date(formData.settlementTime).getTime() / 1000;
 
-    // Set the collateral token address
-    if (
-      formData.chain === "chainB" &&
-      formData.collateralAsset === "collateral1"
-    ) {
-      // USDC
-      collateralTokenAddress = SEPOLIA_MOCK_USDC_TOKEN_ADDRESS;
-    }
-
     // Set isPartyALong
     isPartyALong = formData.position === "long";
 
     console.log("Form Data:", formData);
-    console.log(
-      "Real data:",
-      receiverAddress,
-      destinationChainSelector,
-      priceFeedAddress,
-      strikePriceInWei,
-      settlementTimeUnix,
-      collateralTokenAddress,
-      collateralAmountInWei,
-      isPartyALong
-    );
 
-    // const mintingPrice = await calculateMintingPrice();
+    if (formData.chain === "chainB") {
+      console.log(
+        "Ethereum Sepolia Real data:",
+        "Receiver Address:",
+        receiverAddress,
+        "Destination Chain Selector:",
+        destinationChainSelector,
+        "Price Feed Address:",
+        priceFeedAddress,
+        "Strike Price (Wei):",
+        strikePriceInWei,
+        "Settlement Time Unix:",
+        settlementTimeUnix,
+        "Collateral Token Address:",
+        collateralTokenAddress,
+        "Collateral Amount (Wei):",
+        collateralAmountInWei,
+        "Is Party A Long:",
+        isPartyALong
+      );
+    } else if (formData.chain === "chainA") {
+      console.log(
+        "Arbitrum Sepolia Real data:",
+        "Receiver Address:",
+        receiverAddress,
+        "Destination Chain Selector:",
+        destinationChainSelector,
+        "Feed IDs:",
+        formData.feedId,
+        "Strike Price (Wei):",
+        strikePriceInWei,
+        "Settlement Time Unix:",
+        settlementTimeUnix,
+        "Collateral Token Address:",
+        collateralTokenAddress,
+        "Collateral Amount (Wei):",
+        collateralAmountInWei,
+        "Is Party A Long:",
+        isPartyALong
+      );
+    }
 
     // Interact with the contract
     if (typeof window.ethereum !== "undefined") {
       try {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
-        const contract = new ethers.Contract(
-          FUJI_FACTORY_SENDER_ADDRESS,
-          FUJI_FACTORY_SENDER_ABI,
-          signer
-        );
+        let tx;
 
-        const tx = await contract.createCrossChainCustomDerivative(
-          receiverAddress,
-          destinationChainSelector,
-          priceFeedAddress,
-          strikePriceInWei,
-          settlementTimeUnix,
-          collateralTokenAddress,
-          collateralAmountInWei,
-          isPartyALong
-          // { value: mintingPrice }
-        );
+        if (formData.chain === "chainB") {
+          // Interact with Ethereum Sepolia contract
+          const contract = new ethers.Contract(
+            FUJI_FACTORY_SENDER_ADDRESS,
+            FUJI_FACTORY_SENDER_ABI,
+            signer
+          );
+          tx = await contract.createCrossChainCustomDerivative(
+            receiverAddress,
+            destinationChainSelector,
+            priceFeedAddress,
+            strikePriceInWei,
+            settlementTimeUnix,
+            collateralTokenAddress,
+            collateralAmountInWei,
+            isPartyALong
+          );
+        } else if (formData.chain === "chainA") {
+          // Interact with Arbitrum Sepolia contract
+          const feedIds =
+            formData.underlyingAsset === "asset1"
+              ? [ARBITRUM_SEPOLIA_ETH_USD_FEED_ID]
+              : [];
+          const contract = new ethers.Contract(
+            ARBITRUM_SEPOLIA_FACTORY_ADDRESS,
+            ARBITRUM_SEPOLIA_FACTORY_ABI,
+            signer
+          );
+          tx = await contract.createCustomDerivative(
+            signer.getAddress(), // partyA
+            ARBITRUM_SEPOLIA_VERIFIER_ADDRESS, // verifier
+            strikePriceInWei,
+            settlementTimeUnix,
+            collateralTokenAddress,
+            collateralAmountInWei,
+            isPartyALong,
+            testFeedIds
+          );
+        }
+
         const receipt = await tx.wait();
         setTxHash(receipt.transactionHash); // Update txHash state
         console.log("Contract deployed successfully");
@@ -167,6 +245,7 @@ const DeploySection = () => {
     } else {
       console.log("MetaMask is not installed");
     }
+
     setLoading(false);
   };
 
@@ -317,13 +396,23 @@ const DeploySection = () => {
       {txHash && (
         <div className={styles.successMessage}>
           <p>Transaction Successful!</p>
-          <a
-            href={`https://testnet.snowtrace.io/tx/${txHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View on Snowtrace
-          </a>
+          {formData.chain === "chainB" ? (
+            <a
+              href={`https://testnet.snowtrace.io/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on Snowtrace
+            </a>
+          ) : (
+            <a
+              href={`https://sepolia.arbiscan.io/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View on Arbiscan
+            </a>
+          )}
         </div>
       )}
     </div>

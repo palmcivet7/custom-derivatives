@@ -127,7 +127,7 @@ const DeployedContractsArbSep = () => {
     switch (assetAddress) {
       case "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b":
         return "ETH";
-      case "0xbd3f8ec76e5829a4a35ce369a19c7b53bcb14d98":
+      case "0xbD3F8EC76E5829a4A35Ce369a19c7B53bCb14d98":
         return "USDC";
       default:
         return assetAddress;
