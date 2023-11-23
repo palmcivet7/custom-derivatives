@@ -113,16 +113,6 @@ const DeployedContractsArbSep = () => {
     }
   };
 
-  const formatAssetArray = (feedId) => {
-    // Map the feedId to the corresponding asset name
-    const knownFeedId =
-      "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b";
-    if (feedId === knownFeedId) {
-      return "ETH";
-    }
-    return "Unknown Asset"; // Default case if feedId does not match
-  };
-
   const formatAsset = (assetAddress) => {
     switch (assetAddress) {
       case "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b":
