@@ -19,7 +19,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  *  - collateral amount (amount of collateral to be deposited by both parties)
  *  - long or short position (the deploying user will choose their position and the counterparty will take the opposite)
  * @dev Chainlink Automation is used for settling the CustomDerivative contract so when a new contract is deployed here,
- * we need to register it with Chainlink Automation using registerUpkeepForDeployedContract().
+ * we need to register it with Chainlink Automation using registerAndPredictID().
  */
 
 struct RegistrationParams {

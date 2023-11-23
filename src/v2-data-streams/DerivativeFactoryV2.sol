@@ -23,7 +23,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  *  - collateral amount (amount of collateral to be deposited by both parties)
  *  - long or short position (the deploying user will choose their position and the counterparty will take the opposite)
  * @dev Chainlink Automation is used for settling the CustomDerivative contract so when a new contract is deployed here,
- * we need to register it with Chainlink Automation using registerUpkeepForDeployedContract().
+ * we need to register it with Chainlink Automation using registerAndPredictID().
  */
 
 struct RegistrationParams {
@@ -85,7 +85,6 @@ contract DerivativeFactoryV2 is Ownable {
 
         emit DerivativeCreated(address(newCustomDerivative), partyA);
         registerAndPredictID(address(newCustomDerivative));
-        registerAndPredictIDLogTrigger(address(newCustomDerivative));
         if (!LinkTokenInterface(i_link).transfer(address(newCustomDerivative), 2000000000000000000)) {
             revert DerivativeFactory__LinkTransferFailed();
         }
@@ -112,31 +111,6 @@ contract DerivativeFactoryV2 is Ownable {
             emit CustomLogicUpkeepRegistered(upkeepID, _deployedContract);
         } else {
             revert DerivativeFactory__CustomLogicRegistrationFailed();
-        }
-    }
-
-    function registerAndPredictIDLogTrigger(address _deployedContract) private {
-        bytes32 eventHash = keccak256(abi.encodePacked("SettlementTimeReached(uint256)"));
-
-        RegistrationParams memory params = RegistrationParams({
-            name: "",
-            encryptedEmail: hex"",
-            upkeepContract: _deployedContract,
-            gasLimit: 2000000,
-            adminAddress: owner(),
-            triggerType: 1, // 	0 is Conditional upkeep, 1 is Log trigger upkeep
-            checkData: hex"",
-            triggerConfig: abi.encode(_deployedContract, 0, eventHash, 0x0, 0x0, 0x0),
-            offchainConfig: hex"",
-            amount: 1000000000000000000
-        });
-
-        LinkTokenInterface(i_link).approve(i_registrar, params.amount);
-        uint256 upkeepID = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
-        if (upkeepID != 0) {
-            emit LogTriggerUpkeepRegistered(upkeepID, _deployedContract);
-        } else {
-            revert DerivativeFactory__LogTriggerRegistrationFailed();
         }
     }
 
