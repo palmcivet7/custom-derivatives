@@ -2,7 +2,7 @@
 
 This project allows users to deploy custom derivative contracts to any chain, speculating on any asset, with any collateral. Palmcivet's Custom Derivatives utilizes Chainlink [CCIP](https://docs.chain.link/ccip), [Automation](https://docs.chain.link/chainlink-automation), [Data Feeds](https://docs.chain.link/data-feeds), and [Data Streams](https://docs.chain.link/data-streams). There are two versions of this project - **V1** uses [Data Feeds](https://docs.chain.link/data-feeds) and **V2** uses [Data Streams](https://docs.chain.link/data-streams). Both of these Chainlink services are used for securing the price of the underlying asset in the derivative contract, but in slightly different ways - Data Feeds is a push based oracle and Data Streams is a pull based oracle.
 
-[Video Demonstration](placeholder).
+[Video Demonstration](placeholder)
 
 ## Table of Contents
 
@@ -47,7 +47,7 @@ As mentioned above there are two versions of this project, each utilizing a diff
 
 ### V2 - Data Streams
 
-My original intention when starting the development of this project was to use only Data Streams to secure the _underlying asset_'s price and also use CCIP to allow users to deploy to their chain of choice. When starting development I was under the impression Data Streams testnet access was restricted and built **V1** with Data Feeds in place of where Data Streams was intended. It turned out testnet access for Data Streams was not restricted and after implementing Data Streams I realised that unfortunately it was [not available on a CCIP compatible testnet](https://docs.chain.link/data-streams/stream-ids?network=arbitrum&page=1#networks). That is the reason there are two versions of this project currently. When Data Streams is on a [CCIP supported network](https://docs.chain.link/ccip/supported-networks/testnet), the option to deploy to a choice of chains through CCIP with Data Streams securing the _underlying asset_'s price will be available.
+My original intention when starting the development of this project was to use only Data Streams to secure the _underlying asset_'s price and also use CCIP to allow users to deploy to their chain of choice. When starting development I was under the impression Data Streams testnet access was restricted and so built **V1** with Data Feeds in place of where Data Streams was intended. It turned out testnet access for Data Streams was not restricted and after implementing Data Streams I realised that unfortunately it was [not available on a CCIP compatible testnet](https://docs.chain.link/data-streams/stream-ids?network=arbitrum&page=1#networks). That is the reason there are two versions of this project currently. When Data Streams is on a [CCIP supported network](https://docs.chain.link/ccip/supported-networks/testnet), the option to deploy to a choice of chains through CCIP with Data Streams securing the _underlying asset_'s price will be available.
 
 Chainlink Custom Logic Automation is once again used in this version with the Data Streams `StreamsLookup` revert error emitted in the `checkUpkeep()` function. The `checkCallback()` function checks the data in the emitted error, passing it to `performUpkeep()` which retrieves the price and settles the contract.
 
@@ -55,7 +55,7 @@ Chainlink Custom Logic Automation is once again used in this version with the Da
 
 ### V1 Deployments/Transactions
 
-[Factory Sender contract deployed on Avalanche Fuji](https://testnet.snowtrace.io/address/0x98be1c31fb80d1760604775fa6027025e436ad70#code) _this deployment comments out payable logic in send() and still has getPrice() from aggregator from when I was considering having users pay a predetermined price based on Data Feeds_
+[Factory Sender contract deployed on Avalanche Fuji](https://testnet.snowtrace.io/address/0x98be1c31fb80d1760604775fa6027025e436ad70#code) _this deployment comments out payable logic in `createCrossChainCustomDerivative()`(the CCIP Sender function) and still has `getPrice()` from `AggregatorV3Interface` from when I was considering having users pay a predetermined price based on Data Feeds_
 
 [Factory Receiver contract deployed on Ethereum Sepolia](https://sepolia.etherscan.io/address/0xa76f758e860053b100184eca3faacf37e6ea4f48#internaltx)
 
