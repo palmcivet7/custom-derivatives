@@ -55,7 +55,7 @@ Chainlink Custom Logic Automation is once again used in this version with the Da
 
 ### V1 Deployments/Transactions
 
-[Factory Sender contract deployed on Avalanche Fuji](https://testnet.snowtrace.io/address/0x98be1c31fb80d1760604775fa6027025e436ad70#code) _this deployment comments out payable logic in `createCrossChainCustomDerivative()`(the CCIP Sender function) and still has `getPrice()` from `AggregatorV3Interface` from when I was considering having users pay a predetermined price based on Data Feeds_
+[Factory Sender contract deployed on Avalanche Fuji](https://testnet.snowtrace.io/address/0x98be1c31fb80d1760604775fa6027025e436ad70#code) _**Note**: this deployment comments out payable logic in `createCrossChainCustomDerivative()`(the CCIP Sender function) and still has `getPrice()` from `AggregatorV3Interface` from when I was considering having users pay a predetermined price based on Data Feeds_
 
 [Factory Receiver contract deployed on Ethereum Sepolia](https://sepolia.etherscan.io/address/0xa76f758e860053b100184eca3faacf37e6ea4f48#internaltx)
 
