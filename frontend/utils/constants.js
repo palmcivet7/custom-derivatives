@@ -845,12 +845,11 @@ export const SEPOLIA_ETH_PRICE_FEED_ADDRESS =
 export const SEPOLIA_MOCK_USDC_TOKEN_ADDRESS =
   "0x679dc61439EE95b27ac931a4e8b0943F25Ad0f54";
 
-export const ETHERSCAN_API_KEY = "TIYSF9CQSIGQU583U2NZH6E71HIEBQTBFD";
+export const ETHERSCAN_API_KEY = "******YOUR_ETHERSCAN_API_KEY_HERE******";
 
 export const ETHERSCAN_API_URL = "https://api-sepolia.etherscan.io/api";
 
-export const SEPOLIA_RPC_URL =
-  "https://eth-sepolia.g.alchemy.com/v2/Samr4-_Ei5Ib9FjZ7bv1_NgqXuDUmHIq";
+export const SEPOLIA_RPC_URL = "******YOUR_SEPOLIA_RPC_URL_HERE******";
 
 export const ERC20_ABI = [
   {
@@ -1819,7 +1818,7 @@ export const ARBITRUM_SEPOLIA_FACTORY_ABI = [
 
 export const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
 
-export const ARBISCAN_API_KEY = "WPI7ZZS12BKQ7DGIZ51D8T9T79ANN57QY8";
+export const ARBISCAN_API_KEY = "******YOUR_ARBISCAN_API_KEY_HERE******";
 
 export const ARBITRUM_SEPOLIA_ETH_USD_FEED_ID = [
   "0x00027bbaff688c906a3e20a34fe951715d1018d262a5b66e38eda027a674cd1b",
