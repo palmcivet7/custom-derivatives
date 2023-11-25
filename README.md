@@ -2,7 +2,7 @@
 
 This project allows users to deploy custom derivative contracts to any chain, speculating on any asset, with any collateral. Palmcivet's Custom Derivatives utilizes Chainlink [CCIP](https://docs.chain.link/ccip), [Automation](https://docs.chain.link/chainlink-automation), [Data Feeds](https://docs.chain.link/data-feeds), and [Data Streams](https://docs.chain.link/data-streams). There are two versions of this project - **V1** uses [Data Feeds](https://docs.chain.link/data-feeds) and **V2** uses [Data Streams](https://docs.chain.link/data-streams). Both of these Chainlink services are used for securing the price of the underlying asset in the derivative contract, but in slightly different ways - Data Feeds is a push based oracle and Data Streams is a pull based oracle.
 
-[Video Demonstration](placeholder)
+[Video Demonstration](https://www.youtube.com/watch?v=SLAF6xqBhVk)
 
 ## Table of Contents
 
