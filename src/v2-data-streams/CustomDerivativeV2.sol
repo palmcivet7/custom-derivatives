@@ -278,7 +278,8 @@ contract CustomDerivativeV2 is AutomationCompatible {
      * @notice This function settles the contract. It can only be called after the settlementTime has passed
      * and if both parties have deposited their collateral.
      * It pays out both parties collateral to the party who's long or short position was correct.
-     * @dev Chainlink PriceFeeds are used to retrieve the price of the underlying asset.
+     * @dev Chainlink Data Streams are used to retrieve the price of the underlying asset.
+     * @param price This is the price retrieved by Data Streams and passed to this function by performUpkeep().
      * @notice A 2% fee is taken from the total collateral and sent to the developer address
      * for every successful derivative settlement.
      */
@@ -286,7 +287,6 @@ contract CustomDerivativeV2 is AutomationCompatible {
         if (block.timestamp < settlementTime) revert CustomDerivative__SettlementTimeNotReached();
         if (partyACollateral == 0 || partyBCollateral == 0) revert CustomDerivative__CollateralNotFullyDeposited();
 
-        // (, int256 price,,,) = priceFeed.latestRoundData();
         uint256 finalPrice = uint256(int256(price));
         contractSettled = true;
         uint256 totalCollateral = partyACollateral + partyBCollateral;
