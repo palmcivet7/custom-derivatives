@@ -12,6 +12,7 @@ This project allows users to deploy custom derivative contracts to any chain, sp
   - [Versions](#versions)
     - [V1 - Data Feeds](#v1---data-feeds)
     - [V2 - Data Streams](#v2---data-streams)
+    - [zkEVM Edition](#zkevm-edition)
   - [Demonstrations](#demonstrations)
     - [V1 Deployments/Transactions](#v1-deploymentstransactions)
     - [V2 Deployments/Transactions](#v2-deploymentstransactions)
@@ -37,7 +38,7 @@ If one party deposits and the other doesn't, when the _settlement time_ is reach
 
 ## Versions
 
-As mentioned above there are two versions of this project, each utilizing a different Chainlink service for securing the price of the underlying asset - Data Feeds for V1 and Data Streams for V2.
+As mentioned above there are two versions of this project, each utilizing a different Chainlink service for securing the price of the underlying asset - Data Feeds for **V1** and Data Streams for **V2**.
 
 ### V1 - Data Feeds
 
@@ -50,6 +51,10 @@ As mentioned above there are two versions of this project, each utilizing a diff
 My original intention when starting the development of this project was to use only Data Streams to secure the _underlying asset_'s price and also use CCIP to allow users to deploy to their chain of choice. When starting development I was under the impression Data Streams testnet access was restricted and so built **V1** with Data Feeds in place of where Data Streams was intended. It turned out testnet access for Data Streams was not restricted and after implementing Data Streams I realised that unfortunately it was [not available on a CCIP compatible testnet](https://docs.chain.link/data-streams/stream-ids?network=arbitrum&page=1#networks). That is the reason there are two versions of this project currently. When Data Streams is on a [CCIP supported network](https://docs.chain.link/ccip/supported-networks/testnet), the option to deploy to a choice of chains through CCIP with Data Streams securing the _underlying asset_'s price will be available.
 
 Chainlink Custom Logic Automation is once again used in this version with the Data Streams `StreamsLookup` revert error emitted in the `checkUpkeep()` function. The `checkCallback()` function checks the data in the emitted error, passing it to `performUpkeep()` which retrieves the price and settles the contract.
+
+### zkEVM Edition
+
+I also ended up doing a [Polygon zkEVM Edition](https://github.com/palmcivet7/zkevm-custom-derivatives). Although as Chainlink services were unavailable on this chain, I was unable to implement Chainlink features.
 
 ## Demonstrations
 
