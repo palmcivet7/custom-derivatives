@@ -60,13 +60,17 @@ I also ended up doing a [Polygon zkEVM Edition](https://github.com/palmcivet7/zk
 
 ### V1 Deployments/Transactions
 
-[Factory Sender contract deployed on Avalanche Fuji](https://testnet.snowtrace.io/address/0x98be1c31fb80d1760604775fa6027025e436ad70#code) _**Note**: this deployment comments out payable logic in `createCrossChainCustomDerivative()`(the CCIP Sender function) and still has `getPrice()` from `AggregatorV3Interface` from when I was considering having users pay a predetermined price based on Data Feeds_
+[Factory Sender contract on Avalanche Fuji](https://testnet.snowtrace.io/address/0x58937ABbBAA53E86d9aca5796B3a6A937042328c#code-43113)
 
-[Factory Receiver contract deployed on Ethereum Sepolia](https://sepolia.etherscan.io/address/0xa76f758e860053b100184eca3faacf37e6ea4f48#internaltx)
+[Factory Receiver contract on Ethereum Sepolia](https://sepolia.etherscan.io/address/0x714ea1df865e57b79770741373445e7817b8509d#code)
 
-[Successful CCIP Tx deploying a custom derivative](https://ccip.chain.link/msg/0xc532de66f1808a5791eb9c8f301d15fb3cfb197f567ac2be5d1a1d1b7002593d)
+[Tx initiated on Avalanche Fuji](https://testnet.snowtrace.io/tx/0xd02f30205d1a66ff725e523c2e0fc813eac677db57e9921ffe3ddbd60f2333e4)
 
-[Automation paying out to the winning position Tx](https://sepolia.etherscan.io/tx/0x098a07923ea420091c4bfd94dcc0ffd53b2069d7dd91b44442cd83533fdabc2d)
+[Successful CCIP Tx deploying a custom derivative](https://ccip.chain.link/msg/0xfc734a21697871a27b9e2d17e8f05fba53e4c65eb9e8a46a92fa404bc6852b86)
+
+[Tx on Sepolia deploying a custom derivative](https://sepolia.etherscan.io/tx/0xaa8c72545c8b70e841f0c82b5692f808408908579b5afe6f0e202b92edb53547)
+
+[Automation paying out to the winning position Tx](https://sepolia.etherscan.io/tx/0x6274e14ff3688c66be72bd28db923954ade4ea9b17c0897210be1aebdf7c7160)
 
 ---
 
@@ -79,6 +83,8 @@ I also ended up doing a [Polygon zkEVM Edition](https://github.com/palmcivet7/zk
 ## Frontend
 
 The `/frontend` directory contains a basic frontend built with Next.js for deploying custom derivative contracts and depositing collateral.
+
+Make sure to run `npm i`.
 
 To `npm run dev` inside the `/frontend` directory, you will need to provide the following environment variables to `/frontend/utils/constants.js`:
 
