@@ -8,7 +8,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract FactorySender is Ownable {
     error FactorySender__DestinationChainNotAllowlisted(uint64 destinationChainSelector);
-    error FactorySender__NotEnoughPayment();
     error FactorySender__NothingToWithdraw();
     error FactorySender__NoLinkToWithdraw();
     error FactorySender__LinkTransferFailed();
