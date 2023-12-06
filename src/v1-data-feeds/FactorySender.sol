@@ -5,9 +5,9 @@ import {IRouterClient} from "@chainlink/contracts/src/v0.8/ccip/interfaces/IRout
 import {Client} from "@chainlink/contracts/src/v0.8/ccip/libraries/Client.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract FactorySender is Ownable {
+    error FactorySender__DestinationChainNotAllowlisted(uint64 destinationChainSelector);
     error FactorySender__NotEnoughPayment();
     error FactorySender__NothingToWithdraw();
     error FactorySender__NoLinkToWithdraw();
@@ -16,12 +16,22 @@ contract FactorySender is Ownable {
 
     address public immutable i_link;
     address public immutable i_router;
-    address public immutable i_priceFeed;
+    mapping(uint64 chainSelector => bool isAllowlisted) public allowlistedDestinationChains;
 
-    constructor(address _link, address _router, address _priceFeed) {
+    constructor(address _link, address _router) {
         i_link = _link;
         i_router = _router;
-        i_priceFeed = _priceFeed;
+    }
+
+    modifier onlyAllowlistedDestinationChain(uint64 _destinationChainSelector) {
+        if (!allowlistedDestinationChains[_destinationChainSelector]) {
+            revert FactorySender__DestinationChainNotAllowlisted(_destinationChainSelector);
+        }
+        _;
+    }
+
+    function allowlistDestinationChain(uint64 _destinationChainSelector, bool allowed) external onlyOwner {
+        allowlistedDestinationChains[_destinationChainSelector] = allowed;
     }
 
     function createCrossChainCustomDerivative(
@@ -33,18 +43,7 @@ contract FactorySender is Ownable {
         address _collateralToken,
         uint256 _collateralAmount,
         bool _isPartyALong
-    ) public payable {
-        uint256 price = getLatestPrice();
-        uint256 mintingPrice = (5 * 10 ** 18 * 10 ** 8) / price;
-        if (msg.value < mintingPrice) {
-            revert FactorySender__NotEnoughPayment();
-        }
-
-        if (msg.value > mintingPrice) {
-            uint256 excessAmount = msg.value - mintingPrice;
-            payable(msg.sender).transfer(excessAmount);
-        }
-
+    ) public onlyAllowlistedDestinationChain(_destinationChainSelector) {
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(_receiver),
             data: abi.encode(_priceFeed, _strikePrice, _settlementTime, _collateralToken, _collateralAmount, _isPartyALong),
@@ -56,11 +55,6 @@ contract FactorySender is Ownable {
         uint256 fees = IRouterClient(i_router).getFee(_destinationChainSelector, message);
         LinkTokenInterface(i_link).approve(address(i_router), fees);
         IRouterClient(i_router).ccipSend(_destinationChainSelector, message);
-    }
-
-    function getLatestPrice() public view returns (uint256) {
-        (, int256 price,,,) = AggregatorV3Interface(i_priceFeed).latestRoundData();
-        return uint256(price);
     }
 
     function withdraw() public onlyOwner {
