@@ -13,6 +13,10 @@ This project allows users to deploy custom derivative contracts to any chain, sp
     - [V1 - Data Feeds](#v1---data-feeds)
     - [V2 - Data Streams](#v2---data-streams)
     - [zkEVM Edition](#zkevm-edition)
+  - [Deployment Instructions](#deployment-instructions)
+    - [V1 Deployment Instructions](#v1-deployment-instructions)
+    - [V2 Deployment Instructions](#v2-deployment-instructions)
+    - [Additional Deployment Instructions](#additional-deployment-instructions)
   - [Demonstrations](#demonstrations)
     - [V1 Deployments/Transactions](#v1-deploymentstransactions)
     - [V2 Deployments/Transactions](#v2-deploymentstransactions)
@@ -55,6 +59,42 @@ Chainlink Custom Logic Automation is once again used in this version with the Da
 ### zkEVM Edition
 
 I also ended up doing a [Polygon zkEVM Edition](https://github.com/palmcivet7/zkevm-custom-derivatives). Although as Chainlink services were unavailable on this chain, I was unable to implement Chainlink features.
+
+## Deployment Instructions
+
+Please provide a `.env` file that includes a `$PRIVATE_KEY` and RPC URLs for `$CHAIN_A` and `$CHAIN_B`.
+
+### V1 Deployment Instructions
+
+First deploy the _Factory Sender_ contract on _Chain A_ with the following command:
+
+```
+forge script script/v1-data-feeds/DeployFactorySender.s.sol --rpc-url $CHAIN_A --private-key $PRIVATE_KEY --broadcast
+```
+
+Then deploy the _Factory Receiver_ contract on _Chain B_:
+
+```
+forge script script/v1-data-feeds/DeployFactoryReceiver.s.sol --rpc-url $CHAIN_B --private-key $PRIVATE_KEY --broadcast
+```
+
+### V2 Deployment Instructions
+
+Please provide `$ARBITRUM_SEPOLIA_RPC_URL` to your .env file.
+
+Deploy the _Derivative Factory_ with the following command:
+
+```
+forge script script/v2-data-streams/DeployDerivativeFactoryV2.s.sol --private-key $PRIVATE_KEY --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast
+```
+
+### Additional Deployment Instructions
+
+The `Mock USDC` contract that was used for testing purposes can be deployed with the following command:
+
+```
+forge script script/DeployMockUSDC.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
 
 ## Demonstrations
 
