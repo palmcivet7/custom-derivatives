@@ -82,7 +82,7 @@ forge script script/v1-data-feeds/DeployFactoryReceiver.s.sol --rpc-url $CHAIN_B
 
 Please provide `$ARBITRUM_SEPOLIA_RPC_URL` to your .env file.
 
-Deploy the _Derivative Factory_ with the following command:
+Deploy the _Derivative Factory_ contract with the following command:
 
 ```
 forge script script/v2-data-streams/DeployDerivativeFactoryV2.s.sol --private-key $PRIVATE_KEY --rpc-url $ARBITRUM_SEPOLIA_RPC_URL --broadcast
@@ -90,7 +90,7 @@ forge script script/v2-data-streams/DeployDerivativeFactoryV2.s.sol --private-ke
 
 ### Additional Deployment Instructions
 
-The `Mock USDC` contract that was used for testing purposes can be deployed with the following command:
+The _Mock USDC_ contract that was used for testing purposes can be deployed with the following command:
 
 ```
 forge script script/DeployMockUSDC.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
