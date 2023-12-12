@@ -9,7 +9,7 @@ contract FactoryReceiver is DerivativeFactory, CCIPReceiver {
     error FactoryReceiver__SourceChainNotAllowed(uint64 sourceChainSelector);
     error FactoryReceiver__SenderNotAllowed(address sender);
 
-    mapping(uint64 chainSelecotor => bool isAllowlisted) public allowlistedSourceChains;
+    mapping(uint64 chainSelector => bool isAllowlisted) public allowlistedSourceChains;
     mapping(address sender => bool isAllowlisted) public allowlistedSenders;
 
     constructor(address _link, address _router, address _registrar)
