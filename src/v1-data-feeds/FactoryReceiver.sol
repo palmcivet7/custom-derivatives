@@ -9,8 +9,8 @@ contract FactoryReceiver is DerivativeFactory, CCIPReceiver {
     error FactoryReceiver__SourceChainNotAllowed(uint64 sourceChainSelector);
     error FactoryReceiver__SenderNotAllowed(address sender);
 
-    mapping(uint64 chainSelector => bool isAllowlisted) public allowlistedSourceChains;
-    mapping(address sender => bool isAllowlisted) public allowlistedSenders;
+    mapping(uint64 chainSelector => bool isAllowlisted) public s_allowlistedSourceChains;
+    mapping(address sender => bool isAllowlisted) public s_allowlistedSenders;
 
     constructor(address _link, address _router, address _registrar)
         DerivativeFactory(_link, _registrar)
@@ -18,19 +18,19 @@ contract FactoryReceiver is DerivativeFactory, CCIPReceiver {
     {}
 
     modifier onlyAllowlisted(uint64 _sourceChainSelector, address _sender) {
-        if (!allowlistedSourceChains[_sourceChainSelector]) {
+        if (!s_allowlistedSourceChains[_sourceChainSelector]) {
             revert FactoryReceiver__SourceChainNotAllowed(_sourceChainSelector);
         }
-        if (!allowlistedSenders[_sender]) revert FactoryReceiver__SenderNotAllowed(_sender);
+        if (!s_allowlistedSenders[_sender]) revert FactoryReceiver__SenderNotAllowed(_sender);
         _;
     }
 
     function allowlistSourceChain(uint64 _sourceChainSelector, bool allowed) external onlyOwner {
-        allowlistedSourceChains[_sourceChainSelector] = allowed;
+        s_allowlistedSourceChains[_sourceChainSelector] = allowed;
     }
 
     function allowlistSender(address _sender, bool allowed) external onlyOwner {
-        allowlistedSenders[_sender] = allowed;
+        s_allowlistedSenders[_sender] = allowed;
     }
 
     function _ccipReceive(Client.Any2EVMMessage memory message)

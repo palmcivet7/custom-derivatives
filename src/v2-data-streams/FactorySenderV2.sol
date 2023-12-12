@@ -15,7 +15,7 @@ contract FactorySenderV2 is Ownable {
 
     address public immutable i_link;
     address public immutable i_router;
-    mapping(uint64 chainSelector => bool isAllowlisted) public allowlistedDestinationChains;
+    mapping(uint64 chainSelector => bool isAllowlisted) public s_allowlistedDestinationChains;
 
     constructor(address _link, address _router) {
         i_link = _link;
@@ -23,14 +23,14 @@ contract FactorySenderV2 is Ownable {
     }
 
     modifier onlyAllowlistedDestinationChain(uint64 _destinationChainSelector) {
-        if (!allowlistedDestinationChains[_destinationChainSelector]) {
+        if (!s_allowlistedDestinationChains[_destinationChainSelector]) {
             revert FactorySender__DestinationChainNotAllowlisted(_destinationChainSelector);
         }
         _;
     }
 
     function allowlistDestinationChain(uint64 _destinationChainSelector, bool allowed) external onlyOwner {
-        allowlistedDestinationChains[_destinationChainSelector] = allowed;
+        s_allowlistedDestinationChains[_destinationChainSelector] = allowed;
     }
 
     function createCrossChainCustomDerivative(
