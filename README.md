@@ -56,6 +56,8 @@ My original intention when starting the development of this project was to use o
 
 Chainlink Custom Logic Automation is once again used in this version with the Data Streams `StreamsLookup` revert error emitted in the `checkUpkeep()` function. The `checkCallback()` function checks the data in the emitted error, passing it to `performUpkeep()` which retrieves the price and settles the contract.
 
+_NOTE: The [CCIP Masterclass Module #3](https://cll-devrel.gitbook.io/ccip-masterclass-3/ccip-masterclass/exercise-xnft#ccip-config-details) showed that Arbitrum Sepolia (the only chain with Data Streams available) is now CCIP compatible, so I have begun integrating CCIP into **V2**._
+
 ### zkEVM Edition
 
 I also ended up doing a [Polygon zkEVM Edition](https://github.com/palmcivet7/zkevm-custom-derivatives). Although as Chainlink services were unavailable on this chain, I was unable to implement Chainlink features.
