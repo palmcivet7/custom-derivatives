@@ -57,7 +57,7 @@ contract FactorySenderV2 is Ownable {
                 _feedIds
                 ),
             tokenAmounts: new Client.EVMTokenAmount[](0),
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 4000000, strict: false})),
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 4000000})),
             feeToken: i_link
         });
 

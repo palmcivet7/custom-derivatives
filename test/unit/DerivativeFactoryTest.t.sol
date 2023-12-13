@@ -10,7 +10,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 import {MockUSDC} from "../mocks/MockUSDC.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-import {HelperReceiverConfig} from "../../script/v1-data-feeds/HelperReceiverConfig.s.sol";
+import {HelperReceiverConfig} from "../../script/HelperReceiverConfig.s.sol";
 import {MockLinkToken} from "@chainlink/contracts/src/v0.8/mocks/MockLinkToken.sol";
 
 contract DerivativeFactoryTest is Test {
