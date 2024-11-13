@@ -8,12 +8,10 @@ import {AutomationCompatible} from "@chainlink/contracts/src/v0.8/automation/Aut
 
 /**
  * @title CustomDerivative
- * @author palmcivet.eth
- *
+ * @author palmcivet
  * This is the custom contract that is deployed by users via the DerivativeFactory contract.
  * @notice This contract contains the main logic for our the derivative agreement between parties.
  */
-
 contract CustomDerivative is AutomationCompatible {
     error CustomDerivative__InvalidAddress();
     error CustomDerivative__NeedsToBeMoreThanZero();
@@ -33,13 +31,6 @@ contract CustomDerivative is AutomationCompatible {
     error CustomDerivative__ContractNotCancelled();
     error CustomDerivative__CollateralNotFullyDeposited();
     error CustomDerivative__CollateralFullyDeposited();
-
-    event CounterpartyEntered(address partyB);
-    event CollateralDeposited(address depositor, uint256 amount);
-    event ContractSettled(uint256 finalPrice);
-    event ContractCancelled();
-    event CollateralWithdrawn(address withdrawer, uint256 amount);
-    event PartyRequestedCancellation(address party);
 
     address payable public immutable partyA;
     address payable public partyB;
@@ -62,6 +53,26 @@ contract CustomDerivative is AutomationCompatible {
     bool public partyACancel;
     bool public partyBCancel;
     bool public contractCancelled;
+
+    event CounterpartyEntered(address partyB);
+    event CollateralDeposited(address depositor, uint256 amount);
+    event ContractSettled(uint256 finalPrice);
+    event ContractCancelled();
+    event CollateralWithdrawn(address withdrawer, uint256 amount);
+    event PartyRequestedCancellation(address party);
+
+    //////////////////////////////
+    ///////// Modifiers /////////
+    ////////////////////////////
+
+    /**
+     * @notice Functions with this modifier will revert if the contract has already settled or been cancelled.
+     */
+    modifier notSettledOrCancelled() {
+        if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
+        if (contractCancelled) revert CustomDerivative__ContractCancelled();
+        _;
+    }
 
     /**
      * @param _partyA The address of user who deployed the custom contract via the DerivativeFactory
@@ -98,19 +109,6 @@ contract CustomDerivative is AutomationCompatible {
         isPartyALong = _isPartyALong;
         counterpartyAgreed = false;
         contractSettled = false;
-    }
-
-    //////////////////////////////
-    ///////// Modifiers /////////
-    ////////////////////////////
-
-    /**
-     * @notice Functions with this modifier will revert if the contract has already settled or been cancelled.
-     */
-    modifier notSettledOrCancelled() {
-        if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
-        if (contractCancelled) revert CustomDerivative__ContractCancelled();
-        _;
     }
 
     //////////////////////////////////////

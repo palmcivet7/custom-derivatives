@@ -11,15 +11,13 @@ import {ChainlinkCommon} from "../libraries/ChainlinkCommon.sol";
 
 /**
  * @title CustomDerivativeV2
- * @author palmcivet.eth
- *
+ * @author palmcivet
  * This V2 contract is differentiated from the first CustomDerivative contract because it uses
  * Data Streams as opposed to Data Feeds for efficiently securing the underlying asset price
  * at the time of settlement.
  * This is the custom contract that is deployed by users via the DerivativeFactoryV2 contract.
  * @notice This contract contains the main logic for our the derivative agreement between parties.
  */
-
 interface StreamsLookupCompatibleInterface {
     error StreamsLookup(string feedParamKey, string[] feeds, string timeParamKey, uint256 time, bytes extraData);
 
@@ -56,13 +54,6 @@ contract CustomDerivativeV2 is AutomationCompatible {
     error CustomDerivative__CollateralNotFullyDeposited();
     error CustomDerivative__CollateralFullyDeposited();
 
-    event CounterpartyEntered(address partyB);
-    event CollateralDeposited(address depositor, uint256 amount);
-    event ContractSettled(uint256 finalPrice);
-    event ContractCancelled();
-    event CollateralWithdrawn(address withdrawer, uint256 amount);
-    event PartyRequestedCancellation(address party);
-
     struct BasicReport {
         bytes32 feedId; // The feed ID the report has data for
         uint32 validFromTimestamp; // Earliest timestamp for which price is applicable
@@ -98,6 +89,26 @@ contract CustomDerivativeV2 is AutomationCompatible {
     string public constant STRING_DATASTREAMS_FEEDLABEL = "feedIDs";
     string public constant STRING_DATASTREAMS_QUERYLABEL = "timestamp";
     string[] public feedIds;
+
+    event CounterpartyEntered(address partyB);
+    event CollateralDeposited(address depositor, uint256 amount);
+    event ContractSettled(uint256 finalPrice);
+    event ContractCancelled();
+    event CollateralWithdrawn(address withdrawer, uint256 amount);
+    event PartyRequestedCancellation(address party);
+
+    //////////////////////////////
+    ///////// Modifiers /////////
+    ////////////////////////////
+
+    /**
+     * @notice Functions with this modifier will revert if the contract has already settled or been cancelled.
+     */
+    modifier notSettledOrCancelled() {
+        if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
+        if (contractCancelled) revert CustomDerivative__ContractCancelled();
+        _;
+    }
 
     /**
      * @param _partyA The address of user who deployed the custom contract via the DerivativeFactory
@@ -137,19 +148,6 @@ contract CustomDerivativeV2 is AutomationCompatible {
         counterpartyAgreed = false;
         contractSettled = false;
         feedIds = _feedIds;
-    }
-
-    //////////////////////////////
-    ///////// Modifiers /////////
-    ////////////////////////////
-
-    /**
-     * @notice Functions with this modifier will revert if the contract has already settled or been cancelled.
-     */
-    modifier notSettledOrCancelled() {
-        if (contractSettled) revert CustomDerivative__ContractAlreadySettled();
-        if (contractCancelled) revert CustomDerivative__ContractCancelled();
-        _;
     }
 
     //////////////////////////////////////

@@ -8,8 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title DerivativeFactory
- * @author palmcivet.eth
- *
+ * @author palmcivet
  * This is the factory contract that allows users to deploy their own versions of our CustomDerivative contract.
  * When a user deploys their CustomDerivative contract they will specify the following parameters:
  *  - underlying asset
@@ -21,7 +20,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Chainlink Automation is used for settling the CustomDerivative contract so when a new contract is deployed here,
  * we need to register it with Chainlink Automation using registerAndPredictID().
  */
-
 struct RegistrationParams {
     string name;
     bytes encryptedEmail;
@@ -45,11 +43,11 @@ contract DerivativeFactory is Ownable {
     error DerivativeFactory__LinkTransferAndCallFailed();
     error DerivativeFactory__AutomationRegistrationFailed();
 
-    event DerivativeCreated(address derivativeContract, address partyA);
-    event UpkeepRegistered(uint256 upkeepID, address derivativeContract);
-
     address public immutable i_link;
     address public immutable i_registrar;
+
+    event DerivativeCreated(address derivativeContract, address partyA);
+    event UpkeepRegistered(uint256 upkeepID, address derivativeContract);
 
     constructor(address _link, address _registrar) {
         i_link = _link;
@@ -66,13 +64,7 @@ contract DerivativeFactory is Ownable {
         bool isPartyALong
     ) public returns (address) {
         CustomDerivative newCustomDerivative = new CustomDerivative(
-            partyA,
-            priceFeed,
-            strikePrice,
-            settlementTime,
-            collateralToken,
-            collateralAmount,
-            isPartyALong
+            partyA, priceFeed, strikePrice, settlementTime, collateralToken, collateralAmount, isPartyALong
         );
 
         emit DerivativeCreated(address(newCustomDerivative), partyA);

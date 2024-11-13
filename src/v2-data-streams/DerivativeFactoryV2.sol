@@ -8,8 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title DerivativeFactoryV2
- * @author palmcivet.eth
- *
+ * @author palmcivet
  * This V2 contract is differentiated from the first DerivativeFactory contract because the CustomDerivative it
  * deploys uses Data Streams as opposed to Data Feeds for efficiently securing the underlying asset price
  * at the time of settlement.
@@ -25,7 +24,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * @dev Chainlink Automation is used for settling the CustomDerivative contract so when a new contract is deployed here,
  * we need to register it with Chainlink Automation using registerAndPredictID().
  */
-
 struct RegistrationParams {
     string name;
     bytes encryptedEmail;
@@ -50,12 +48,12 @@ contract DerivativeFactoryV2 is Ownable {
     error DerivativeFactory__CustomLogicRegistrationFailed();
     error DerivativeFactory__LogTriggerRegistrationFailed();
 
+    address public immutable i_link;
+    address public immutable i_registrar;
+
     event DerivativeCreated(address derivativeContract, address partyA);
     event CustomLogicUpkeepRegistered(uint256 upkeepID, address derivativeContract);
     event LogTriggerUpkeepRegistered(uint256 upkeepID, address derivativeContract);
-
-    address public immutable i_link;
-    address public immutable i_registrar;
 
     constructor(address _link, address _registrar) {
         i_link = _link;
@@ -73,14 +71,7 @@ contract DerivativeFactoryV2 is Ownable {
         string[] memory feedIds
     ) public returns (address) {
         CustomDerivativeV2 newCustomDerivative = new CustomDerivativeV2(
-            partyA,
-            verifier,
-            strikePrice,
-            settlementTime,
-            collateralToken,
-            collateralAmount,
-            isPartyALong,
-            feedIds
+            partyA, verifier, strikePrice, settlementTime, collateralToken, collateralAmount, isPartyALong, feedIds
         );
 
         emit DerivativeCreated(address(newCustomDerivative), partyA);
