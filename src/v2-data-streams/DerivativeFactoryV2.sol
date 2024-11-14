@@ -105,7 +105,7 @@ contract DerivativeFactoryV2 is Ownable {
         }
     }
 
-    function withdrawLink() public onlyOwner {
+    function withdrawLink() external onlyOwner {
         uint256 balance = LinkTokenInterface(i_link).balanceOf(address(this));
         if (balance == 0) revert DerivativeFactory__NoLinkToWithdraw();
 
